@@ -12701,8 +12701,8 @@ msgstr "Ad esempio: {} Apri"
 #. Description of the 'Client Script' (Code) field in DocType 'Web Form'
 #: website/doctype/web_form/web_form.json
 msgctxt "Web Form"
-msgid "For help see <a href=\"https://frappeframework.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">Client Script API and Examples</a>"
-msgstr "Per assistenza, vedere <a href=\"https://frappeframework.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">API Script client ed esempi</a>"
+msgid "For help see <a href=\"https://aibizzapp.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">Client Script API and Examples</a>"
+msgstr "Per assistenza, vedere <a href=\"https://aibizzapp.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">API Script client ed esempi</a>"
 
 #. Description of the 'Enable Automatic Linking in Documents' (Check) field in
 #. DocType 'Email Account'

@@ -10671,8 +10671,8 @@ msgstr "على سبيل المثال: {} فتح"
 
 #. Description of the 'Client script' (Code) field in DocType 'Web Form'
 #: frappe/website/doctype/web_form/web_form.json
-msgid "For help see <a href=\"https://frappeframework.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">Client Script API and Examples</a>"
-msgstr "للحصول على المساعدة ، راجع <a href=\"https://frappeframework.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">أمثلة و API Script</a>"
+msgid "For help see <a href=\"https://aibizzapp.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">Client Script API and Examples</a>"
+msgstr "للحصول على المساعدة ، راجع <a href=\"https://aibizzapp.com/docs/user/en/guides/portal-development/web-forms\" target=\"_blank\">أمثلة و API Script</a>"
 
 #. Description of the 'Enable Automatic Linking in Documents' (Check) field in
 #. DocType 'Email Account'
@@ -17863,7 +17863,7 @@ msgid "Open Settings"
 msgstr "أفتح الإعدادات"
 
 #: frappe/public/js/frappe/ui/toolbar/about.js:8
-msgid "Open Source Applications for the Web"
+msgid "Streamline Your Business With AiBizzHub"
 msgstr ""
 
 #. Label of the open_in_new_tab (Check) field in DocType 'Top Bar Item'

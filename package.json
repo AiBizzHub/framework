@@ -18,7 +18,7 @@
   "engines": {
     "node": ">=18"
   },
-  "homepage": "https://frappeframework.com",
+  "homepage": "https://aibizzapp.com",
   "dependencies": {
     "@editorjs/editorjs": "^2.28.2",
     "@frappe/esbuild-plugin-postcss2": "^0.1.3",
