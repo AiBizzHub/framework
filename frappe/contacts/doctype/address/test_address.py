@@ -1,22 +1,13 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 from functools import partial
 
 import frappe
 from frappe.contacts.doctype.address.address import address_query, get_address_display
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestAddress(UnitTestCase):
-	"""
-	Unit tests for Address.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestAddress(IntegrationTestCase):
+class TestAddress(FrappeTestCase):
 	def test_template_works(self):
 		if not frappe.db.exists("Address Template", "India"):
 			frappe.get_doc({"doctype": "Address Template", "country": "India", "is_default": 1}).insert()

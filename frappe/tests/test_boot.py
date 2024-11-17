@@ -1,10 +1,10 @@
 import frappe
 from frappe.boot import get_unseen_notes, get_user_pages_or_reports
 from frappe.desk.doctype.note.note import mark_as_seen
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestBootData(IntegrationTestCase):
+class TestBootData(FrappeTestCase):
 	def test_get_unseen_notes(self):
 		frappe.db.delete("Note")
 		frappe.db.delete("Note Seen By")
@@ -28,10 +28,10 @@ class TestBootData(IntegrationTestCase):
 		self.assertListEqual(unseen_notes, [])
 
 
-class TestPermissionQueries(IntegrationTestCase):
+class TestPermissionQueries(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls) -> None:
-		cls.enterClassContext(cls.enable_safe_exec())
+		cls.enable_safe_exec()
 		return super().setUpClass()
 
 	def test_get_user_pages_or_reports_with_permission_query(self):
@@ -49,12 +49,14 @@ class TestPermissionQueries(IntegrationTestCase):
 
 		# Add permission query such that each user can only see their own custom reports
 		frappe.get_doc(
-			doctype="Server Script",
-			name="test_report_permission_query",
-			script_type="Permission Query",
-			reference_doctype="Report",
-			script="""conditions = f"(`tabReport`.is_standard = 'Yes' or `tabReport`.owner = '{frappe.session.user}')"
+			dict(
+				doctype="Server Script",
+				name="test_report_permission_query",
+				script_type="Permission Query",
+				reference_doctype="Report",
+				script="""conditions = f"(`tabReport`.is_standard = 'Yes' or `tabReport`.owner = '{frappe.session.user}')"
 				""",
+			)
 		).insert()
 
 		# Create a ToDo custom report with test user

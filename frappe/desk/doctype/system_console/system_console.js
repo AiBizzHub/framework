@@ -1,4 +1,4 @@
-// Copyright (c) 2020, AiBizzApp Technologies and contributors
+// Copyright (c) 2020, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("System Console", {
@@ -41,10 +41,6 @@ frappe.ui.form.on("System Console", {
 				frm.get_field("sql_output").html("");
 			}
 		}
-
-		const field = frm.get_field("console");
-		field.df.options = frm.doc.type;
-		field.set_language();
 	},
 
 	render_sql_output: function (frm) {

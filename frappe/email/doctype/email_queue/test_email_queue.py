@@ -1,22 +1,13 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import textwrap
 
 import frappe
 from frappe.email.doctype.email_queue.email_queue import SendMailContext, get_email_retry_limit
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestEmailQueue(UnitTestCase):
-	"""
-	Unit tests for EmailQueue.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestEmailQueue(IntegrationTestCase):
+class TestEmailQueue(FrappeTestCase):
 	def test_email_queue_deletion_based_on_modified_date(self):
 		from frappe.email.doctype.email_queue.email_queue import EmailQueue
 
@@ -36,8 +27,8 @@ class TestEmailQueue(IntegrationTestCase):
 			}
 		).insert()
 
-		old_record.creation = "2010-01-01 00:00:01"
-		old_record.recipients[0].creation = old_record.creation
+		old_record.modified = "2010-01-01 00:00:01"
+		old_record.recipients[0].modified = old_record.modified
 		old_record.db_update_all()
 
 		new_record = frappe.copy_doc(old_record)
@@ -65,7 +56,7 @@ class TestEmailQueue(IntegrationTestCase):
 		To: <!--recipient-->
 		Date: {frappe.utils.now_datetime().strftime('%a, %d %b %Y %H:%M:%S %z')}
 		Reply-To: test@example.com
-		X-AiBizzApp-Site: {frappe.local.site}
+		X-Frappe-Site: {frappe.local.site}
 		"""
 		)
 		email_record.status = "Error"

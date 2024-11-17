@@ -195,7 +195,7 @@ frappe.render_pdf = function (html, opts = {}) {
 
 	var xhr = new XMLHttpRequest();
 	xhr.open("POST", "/api/method/frappe.utils.print_format.report_to_pdf");
-	xhr.setRequestHeader("X-AiBizzApp-CSRF-Token", frappe.csrf_token);
+	xhr.setRequestHeader("X-Frappe-CSRF-Token", frappe.csrf_token);
 	xhr.responseType = "arraybuffer";
 
 	xhr.onload = function (success) {

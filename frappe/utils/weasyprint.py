@@ -99,7 +99,12 @@ class PrintFormatGenerator:
 		return header_html, footer_html
 
 	def render_pdf(self):
-		"""Return a bytes sequence of the rendered PDF."""
+		"""
+		Returns
+		-------
+		pdf: a bytes sequence
+		        The rendered PDF.
+		"""
 		HTML, CSS = import_weasyprint()
 
 		self._make_header_footer()

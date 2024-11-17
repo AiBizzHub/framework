@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -19,5 +19,4 @@ class CalendarView(Document):
 		start_date_field: DF.Literal[None]
 		subject_field: DF.Literal[None]
 	# end: auto-generated types
-
 	pass

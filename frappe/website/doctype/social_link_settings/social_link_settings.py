@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -21,5 +21,4 @@ class SocialLinkSettings(Document):
 		parenttype: DF.Data
 		social_link_type: DF.Literal["", "facebook", "linkedin", "twitter", "email"]
 	# end: auto-generated types
-
 	pass

@@ -16,7 +16,7 @@ import frappe.monitor
 from frappe.database.database import Database, EmptyQueryValues
 
 
-class AiBizzAppIntegration(Integration):
+class FrappeIntegration(Integration):
 	identifier = "frappe"
 
 	@staticmethod
@@ -77,7 +77,7 @@ def set_scope(scope):
 	scope.set_user({"id": frappe.local.site})
 	user = getattr(frappe.session, "user", "Unidentified")
 	scope.set_tag("frappe_user", user)
-	# Extract `X-AiBizzApp-Request-ID` to store as a separate field if its present
+	# Extract `X-Frappe-Request-ID` to store as a separate field if its present
 	if trace_id := frappe.monitor.get_trace_id():
 		scope.set_tag("frappe_trace_id", trace_id)
 

@@ -1,12 +1,12 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 
 from frappe.custom.report.audit_system_hooks.audit_system_hooks import execute
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestAuditSystemHooksReport(IntegrationTestCase):
+class TestAuditSystemHooksReport(FrappeTestCase):
 	def test_basic_query(self):
 		_, data = execute()
 		for row in data:

@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -20,5 +20,4 @@ class QueryParameters(Document):
 		parenttype: DF.Data
 		value: DF.Data
 	# end: auto-generated types
-
 	pass

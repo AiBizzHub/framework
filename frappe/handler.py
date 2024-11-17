@@ -15,7 +15,7 @@ from frappe.core.doctype.server_script.server_script_utils import get_server_scr
 from frappe.monitor import add_data_to_monitor
 from frappe.utils import cint
 from frappe.utils.csvutils import build_csv_response
-from frappe.utils.deprecations import deprecated
+from frappe.utils.deprecations import deprecation_warning
 from frappe.utils.image import optimize_image
 from frappe.utils.response import build_response
 
@@ -102,7 +102,11 @@ def is_valid_http_method(method):
 	http_method = frappe.local.request.method
 
 	if http_method not in frappe.allowed_http_methods_for_whitelisted_func[method]:
-		frappe.throw_permission_error()
+		throw_permission_error()
+
+
+def throw_permission_error():
+	frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -118,6 +122,48 @@ def web_logout():
 	frappe.respond_as_web_page(
 		_("Logged Out"), _("You have been successfully logged out"), indicator_color="green"
 	)
+
+
+@frappe.whitelist()
+def uploadfile():
+	deprecation_warning(
+		"uploadfile is deprecated and will be removed in v16. Use upload_file instead.",
+	)
+	ret = None
+	check_write_permission(frappe.form_dict.doctype, frappe.form_dict.docname)
+
+	try:
+		if frappe.form_dict.get("from_form"):
+			try:
+				ret = frappe.get_doc(
+					{
+						"doctype": "File",
+						"attached_to_name": frappe.form_dict.docname,
+						"attached_to_doctype": frappe.form_dict.doctype,
+						"attached_to_field": frappe.form_dict.docfield,
+						"file_url": frappe.form_dict.file_url,
+						"file_name": frappe.form_dict.filename,
+						"is_private": frappe.utils.cint(frappe.form_dict.is_private),
+						"content": frappe.form_dict.filedata,
+						"decode": True,
+					}
+				)
+				ret.save()
+			except frappe.DuplicateEntryError:
+				# ignore pass
+				ret = None
+				frappe.db.rollback()
+		else:
+			if frappe.form_dict.get("method"):
+				method = frappe.get_attr(frappe.form_dict.method)
+				is_whitelisted(method)
+				ret = method()
+	except Exception:
+		frappe.errprint(frappe.utils.get_traceback())
+		frappe.response["http_status_code"] = 500
+		ret = None
+
+	return ret
 
 
 @frappe.whitelist(allow_guest=True)
@@ -173,7 +219,6 @@ def upload_file():
 				args["max_height"] = int(frappe.form_dict.max_height)
 			content = optimize_image(**args)
 
-	frappe.local.uploaded_file_url = file_url
 	frappe.local.uploaded_file = content
 	frappe.local.uploaded_filename = filename
 
@@ -241,12 +286,8 @@ def get_attr(cmd):
 	if "." in cmd:
 		method = frappe.get_attr(cmd)
 	else:
-		from frappe.deprecation_dumpster import deprecation_warning
-
 		deprecation_warning(
-			"unknown",
-			"v17",
-			f"Calling shorthand for {cmd} is deprecated, please specify full path in RPC call.",
+			f"Calling shorthand for {cmd} is deprecated, please specify full path in RPC call."
 		)
 		method = globals()[cmd]
 	return method
@@ -271,7 +312,7 @@ def run_doc_method(method, docs=None, dt=None, dn=None, arg=None, args=None):
 		doc.check_if_latest()
 
 	if not doc or not doc.has_permission("read"):
-		frappe.throw_permission_error()
+		throw_permission_error()
 
 	try:
 		args = frappe.parse_json(args)
@@ -308,4 +349,5 @@ def run_doc_method(method, docs=None, dt=None, dn=None, arg=None, args=None):
 	add_data_to_monitor(methodname=method)
 
 
-runserverobj = deprecated(run_doc_method)
+# for backwards compatibility
+runserverobj = run_doc_method

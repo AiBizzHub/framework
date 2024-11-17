@@ -27,7 +27,7 @@ def get():
 	# If virtual doctype, get data from controller get_list method
 	if is_virtual_doctype(args.doctype):
 		controller = get_controller(args.doctype)
-		data = compress(frappe.call(controller.get_list, args=args, **args))
+		data = compress(controller.get_list(args))
 	else:
 		data = compress(execute(**args), args=args)
 	return data
@@ -40,7 +40,7 @@ def get_list():
 
 	if is_virtual_doctype(args.doctype):
 		controller = get_controller(args.doctype)
-		data = frappe.call(controller.get_list, args=args, **args)
+		data = controller.get_list(args)
 	else:
 		# uncompressed (refactored from frappe.model.db_query.get_list)
 		data = execute(**args)
@@ -55,7 +55,7 @@ def get_count() -> int:
 
 	if is_virtual_doctype(args.doctype):
 		controller = get_controller(args.doctype)
-		count = frappe.call(controller.get_count, args=args, **args)
+		count = controller.get_count(args)
 	else:
 		args.distinct = sbool(args.distinct)
 		distinct = "distinct " if args.distinct else ""
@@ -243,10 +243,6 @@ def parse_json(data):
 		data["save_user_settings"] = json.loads(data["save_user_settings"])
 	else:
 		data["save_user_settings"] = True
-	if isinstance(data.get("start"), str):
-		data["start"] = cint(data.get("start"))
-	if isinstance(data.get("page_length"), str):
-		data["page_length"] = cint(data.get("page_length"))
 
 
 def get_parenttype_and_fieldname(field, data):
@@ -541,7 +537,6 @@ def delete_bulk(doctype, items):
 	undeleted_items = []
 	for i, d in enumerate(items):
 		try:
-			frappe.flags.in_bulk_delete = True
 			frappe.delete_doc(doctype, d)
 			if len(items) >= 5:
 				frappe.publish_realtime(
@@ -582,7 +577,7 @@ def get_sidebar_stats(stats, doctype, filters=None):
 	if is_virtual_doctype(doctype):
 		controller = get_controller(doctype)
 		args = {"stats": stats, "filters": filters}
-		data = frappe.call(controller.get_stats, args=args, **args)
+		data = controller.get_stats(args)
 	else:
 		data = get_stats(stats, doctype, filters)
 

@@ -6,15 +6,12 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "connections_tab",
-  "details_tab",
-  "section_break_dnma",
   "module_name",
+  "custom",
+  "package",
   "app_name",
   "restrict_to_domain",
-  "package",
-  "column_break_giia",
-  "custom"
+  "connections_tab"
  ],
  "fields": [
   {
@@ -60,19 +57,6 @@
    "fieldtype": "Tab Break",
    "label": "Connections",
    "show_dashboard": 1
-  },
-  {
-   "fieldname": "details_tab",
-   "fieldtype": "Tab Break",
-   "label": "Details"
-  },
-  {
-   "fieldname": "column_break_giia",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_dnma",
-   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -139,7 +123,7 @@
    "link_fieldname": "module"
   }
  ],
- "modified": "2024-09-18 12:39:19.512528",
+ "modified": "2023-12-08 15:52:37.525003",
  "modified_by": "Administrator",
  "module": "Core",
  "name": "Module Def",
@@ -175,7 +159,7 @@
   }
  ],
  "show_name_in_global_search": 1,
- "sort_field": "creation",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

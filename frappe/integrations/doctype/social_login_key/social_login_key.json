@@ -52,7 +52,7 @@
    "fieldname": "social_login_provider",
    "fieldtype": "Select",
    "label": "Social Login Provider",
-   "options": "Custom\nFacebook\nAiBizzApp\nGitHub\nGoogle\nOffice 365\nSalesforce\nfairlogin\nKeycloak",
+   "options": "Custom\nFacebook\nFrappe\nGitHub\nGoogle\nOffice 365\nSalesforce\nfairlogin\nKeycloak",
    "set_only_once": 1
   },
   {
@@ -195,7 +195,7 @@
    "write": 1
   }
  ],
- "sort_field": "creation",
+ "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
  "title_field": "provider_name",

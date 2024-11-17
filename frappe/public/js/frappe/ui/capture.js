@@ -1,5 +1,5 @@
 // frappe.ui.Capture
-// Author - Achilles Rasquinha <achilles@aibizzapp.com>
+// Author - Achilles Rasquinha <achilles@frappe.io>
 
 /**
  * @description Converts a canvas, image or a video to a data URL string.
@@ -31,10 +31,6 @@ function get_file_input() {
 	input.setAttribute("accept", "image/*");
 	input.setAttribute("multiple", "");
 
-	// Make sure that the input exists in the DOM
-	input.classList.add("visually-hidden");
-	document.body.appendChild(input);
-
 	return input;
 }
 
@@ -48,7 +44,7 @@ function read(file) {
 }
 
 /**
- * @description AiBizzApp's Capture object.
+ * @description Frappe's Capture object.
  *
  * @example
  * const capture = frappe.ui.Capture()
@@ -129,10 +125,6 @@ frappe.ui.Capture = class {
 				let f = await read(file);
 				me.images.push(f);
 			}
-
-			// Remove the input from the DOM
-			me.input.remove();
-			me.input = null;
 
 			me.render_preview();
 			me.dialog.show();

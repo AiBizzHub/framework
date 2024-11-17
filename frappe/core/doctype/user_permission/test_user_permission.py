@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and Contributors
+# Copyright (c) 2021, AiBizzHub, LLC and Contributors
 # See LICENSE
 import frappe
 from frappe.core.doctype.doctype.test_doctype import new_doctype
@@ -7,20 +7,11 @@ from frappe.core.doctype.user_permission.user_permission import (
 	remove_applicable,
 )
 from frappe.permissions import add_permission, has_user_permission
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.website.doctype.blog_post.test_blog_post import make_test_blog
 
 
-class UnitTestUserPermission(UnitTestCase):
-	"""
-	Unit tests for UserPermission.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestUserPermission(IntegrationTestCase):
+class TestUserPermission(FrappeTestCase):
 	def setUp(self):
 		test_users = (
 			"test_bulk_creation_update@example.com",

@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 from urllib.parse import quote
@@ -31,8 +31,8 @@ class SubmissionQueue(Document):
 		ref_docname: DF.DynamicLink | None
 		ref_doctype: DF.Link | None
 		status: DF.Literal["Queued", "Finished", "Failed"]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	@property
 	def created_at(self):
 		return self.creation
@@ -51,7 +51,7 @@ class SubmissionQueue(Document):
 		from frappe.query_builder.functions import Now
 
 		table = frappe.qb.DocType("Submission Queue")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.modified < (Now() - Interval(days=days))))
 
 	def insert(self, to_be_queued_doc: Document, action: str):
 		self.status = "Queued"

@@ -2,7 +2,6 @@ import re
 
 import psycopg2
 import psycopg2.extensions
-from psycopg2 import sql
 from psycopg2.errorcodes import (
 	CLASS_INTEGRITY_CONSTRAINT_VIOLATION,
 	DEADLOCK_DETECTED,
@@ -131,7 +130,7 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 		self.db_type = "postgres"
 		self.type_map = {
 			"Currency": ("decimal", "21,9"),
-			"Int": ("int", None),
+			"Int": ("bigint", None),
 			"Long Int": ("bigint", None),
 			"Float": ("decimal", "21,9"),
 			"Percent": ("decimal", "21,9"),
@@ -170,19 +169,10 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 	def last_query(self):
 		return LazyDecode(self._cursor.query)
 
-	@property
-	def db_schema(self):
-		return frappe.conf.get("db_schema", "public").replace("'", "").replace('"', "")
-
-	def connect(self):
-		super().connect()
-
-		self._cursor.execute("SET search_path TO %s", (self.db_schema,))
-
 	def get_connection(self):
 		conn_settings = {
-			"dbname": self.cur_db_name,
 			"user": self.user,
+			"dbname": self.cur_db_name,
 			# libpg defaults to default socket if not specified
 			"host": self.host or self.socket,
 		}
@@ -219,14 +209,11 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 		return str(psycopg2.extensions.QuotedString(s))
 
 	def get_database_size(self):
-		"""Return database size in MB"""
+		"""'Returns database size in MB"""
 		db_size = self.sql(
 			"SELECT (pg_database_size(%s) / 1024 / 1024) as database_size", self.cur_db_name, as_dict=True
 		)
 		return db_size[0].get("database_size")
-
-	def _transform_result(self, result: list[tuple] | tuple[tuple]) -> tuple[tuple]:
-		return tuple(result) if isinstance(result, list) else result
 
 	# pylint: disable=W0221
 	def sql(self, query, values=EmptyQueryValues, *args, **kwargs):
@@ -241,33 +228,11 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 			for d in self.sql(
 				"""select table_name
 			from information_schema.tables
-			where table_catalog=%s
+			where table_catalog='{}'
 				and table_type = 'BASE TABLE'
-				and table_schema=%s""",
-				(self.cur_db_name, self.db_schema),
+				and table_schema='{}'""".format(self.cur_db_name, frappe.conf.get("db_schema", "public"))
 			)
 		]
-
-	def get_db_table_columns(self, table) -> list[str]:
-		"""Returns list of column names from given table."""
-		if (columns := frappe.cache.hget("table_columns", table)) is not None:
-			return columns
-
-		information_schema = frappe.qb.Schema("information_schema")
-
-		columns = (
-			frappe.qb.from_(information_schema.columns)
-			.select(information_schema.columns.column_name)
-			.where(
-				(information_schema.columns.table_name == table)
-				& (information_schema.columns.table_schema == self.db_schema)
-			)
-			.run(pluck=True)
-		)
-
-		frappe.cache.hset("table_columns", table, columns)
-
-		return columns
 
 	def format_date(self, date):
 		if not date:
@@ -295,7 +260,7 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 	def describe(self, doctype: str) -> list | tuple:
 		table_name = get_table_name(doctype)
 		return self.sql(
-			f"SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = '{table_name}' and table_schema='{frappe.conf.get('db_schema', 'public')}'"
+			f"SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_NAME = '{table_name}'"
 		)
 
 	def change_column_type(
@@ -371,7 +336,7 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 			db_table.validate()
 
 			db_table.sync()
-			self.commit()
+			self.begin()
 
 	@staticmethod
 	def get_on_duplicate_update(key="name"):
@@ -384,10 +349,8 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 
 	def has_index(self, table_name, index_name):
 		return self.sql(
-			"""SELECT 1 FROM pg_indexes WHERE tablename=%s
-			and schemaname = %s
-			and indexname=%s limit 1""",
-			(table_name, self.db_schema, index_name),
+			f"""SELECT 1 FROM pg_indexes WHERE tablename='{table_name}'
+			and indexname='{index_name}' limit 1"""
 		)
 
 	def add_index(self, doctype: str, fields: list, index_name: str | None = None):
@@ -397,9 +360,7 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 		index_name = index_name or self.get_index_name(fields)
 		fields_str = '", "'.join(re.sub(r"\(.*\)", "", field) for field in fields)
 
-		self.sql_ddl(
-			f'CREATE INDEX IF NOT EXISTS "{index_name}" ON "{self.db_schema}"."{table_name}" ("{fields_str}")'
-		)
+		self.sql_ddl(f'CREATE INDEX IF NOT EXISTS "{index_name}" ON `{table_name}` ("{fields_str}")')
 
 	def add_unique(self, doctype, fields, constraint_name=None):
 		if isinstance(fields, str):
@@ -413,28 +374,17 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 			FROM information_schema.TABLE_CONSTRAINTS
 			WHERE table_name=%s
 			AND constraint_type='UNIQUE'
-			AND constraint_schema=%s
 			AND CONSTRAINT_NAME=%s""",
-			("tab" + doctype, self.db_schema, constraint_name),
+			("tab" + doctype, constraint_name),
 		):
 			self.commit()
-
 			self.sql(
-				sql.SQL(
-					"""ALTER TABLE {schema}.{table}
-					ADD CONSTRAINT {constraint} UNIQUE ({fields})"""
-				)
-				.format(
-					schema=sql.Identifier(self.db_schema),
-					table=sql.Identifier("tab" + doctype),
-					constraint=sql.Identifier(constraint_name),
-					fields=sql.SQL(", ").join(sql.Identifier(field) for field in fields),
-				)
-				.as_string(self._conn)
+				"""ALTER TABLE `tab{}`
+					ADD CONSTRAINT {} UNIQUE ({})""".format(doctype, constraint_name, ", ".join(fields))
 			)
 
 	def get_table_columns_description(self, table_name):
-		"""Return list of columns with description."""
+		"""Returns list of column and its description"""
 		# pylint: disable=W1401
 		return self.sql(
 			f"""
@@ -446,25 +396,23 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 			END AS type,
 			BOOL_OR(b.index) AS index,
 			SPLIT_PART(COALESCE(a.column_default, NULL), '::', 1) AS default,
-			BOOL_OR(b.unique) AS unique,
-			COALESCE(a.is_nullable = 'NO', false) AS not_nullable
+			BOOL_OR(b.unique) AS unique
 			FROM information_schema.columns a
 			LEFT JOIN
 				(SELECT indexdef, tablename,
 					indexdef LIKE '%UNIQUE INDEX%' AS unique,
 					indexdef NOT LIKE '%UNIQUE INDEX%' AS index
 					FROM pg_indexes
-					WHERE tablename='{table_name}' AND schemaname='{self.db_schema}') b
+					WHERE tablename='{table_name}') b
 				ON SUBSTRING(b.indexdef, '(.*)') LIKE CONCAT('%', a.column_name, '%')
 			WHERE a.table_name = '{table_name}'
-				AND a.table_schema = '{self.db_schema}'
-			GROUP BY a.column_name, a.data_type, a.column_default, a.character_maximum_length, a.is_nullable;
+			GROUP BY a.column_name, a.data_type, a.column_default, a.character_maximum_length;
 		""",
 			as_dict=1,
 		)
 
 	def get_column_type(self, doctype, column):
-		"""Return column type from database."""
+		"""Returns column type from database."""
 		information_schema = frappe.qb.Schema("information_schema")
 		table = get_table_name(doctype)
 
@@ -474,7 +422,6 @@ class PostgresDatabase(PostgresExceptionUtil, Database):
 			.where(
 				(information_schema.columns.table_name == table)
 				& (information_schema.columns.column_name == column)
-				& (information_schema.columns.table_schema == self.db_schema)
 			)
 			.run(pluck=True)[0]
 		)

@@ -43,7 +43,8 @@ class WebsiteGenerator(Document):
 			self.route = self.route.strip("/.")[:139]
 
 	def make_route(self):
-		"""Return the default route. If `route` is specified in DocType it will be route/title."""
+		"""Returns the default route. If `route` is specified in DocType it will be
+		route/title"""
 		from_title = self.scrubbed_title()
 		if self.meta.route:
 			return self.meta.route + "/" + from_title
@@ -95,8 +96,8 @@ class WebsiteGenerator(Document):
 
 	def is_website_published(self):
 		"""Return true if published in website"""
-		if condition_field := self.get_condition_field():
-			return self.get(condition_field) or False
+		if self.get_condition_field():
+			return self.get(self.get_condition_field()) and True or False
 		else:
 			return True
 

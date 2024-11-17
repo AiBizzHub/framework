@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -54,5 +54,4 @@ class FormTourStep(Document):
 		title: DF.Data
 		ui_tour: DF.Check
 	# end: auto-generated types
-
 	pass

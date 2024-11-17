@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 from urllib.parse import urljoin
 
@@ -8,7 +8,7 @@ import frappe
 from frappe.integrations.doctype.social_login_key.test_social_login_key import (
 	create_or_update_social_login_key,
 )
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
 def get_user(usr, pwd):
@@ -48,25 +48,16 @@ def get_oauth_client():
 	return oauth_client
 
 
-class UnitTestConnectedApp(UnitTestCase):
-	"""
-	Unit tests for ConnectedApp.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestConnectedApp(IntegrationTestCase):
+class TestConnectedApp(FrappeTestCase):
 	def setUp(self):
 		"""Set up a Connected App that connects to our own oAuth provider.
 
-		AiBizzApp comes with it's own oAuth2 provider that we can test against. The
+		Frappe comes with it's own oAuth2 provider that we can test against. The
 		client credentials can be obtained from an "OAuth Client". All depends
 		on "Social Login Key" so we create one as well.
 
 		The redirect URIs from "Connected App" and "OAuth Client" have to match.
-		AiBizzApp's "Authorization URL" and "Access Token URL" (actually they're
+		Frappe's "Authorization URL" and "Access Token URL" (actually they're
 		just endpoints) are stored in "Social Login Key" so we get them from
 		there.
 		"""

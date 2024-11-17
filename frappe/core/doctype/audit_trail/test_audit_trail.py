@@ -1,21 +1,11 @@
-# Copyright (c) 2023, AiBizzApp Technologies and Contributors
+# Copyright (c) 2023, AiBizzHub, LLC and Contributors
 # See license.txt
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.utils import today
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestAuditTrail(UnitTestCase):
-	"""
-	Unit tests for AuditTrail.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestAuditTrail(IntegrationTestCase):
+class TestAuditTrail(FrappeTestCase):
 	def setUp(self):
 		self.child_doctype = create_custom_child_doctype()
 		self.custom_doctype = create_custom_doctype()
@@ -139,11 +129,6 @@ def amend_document(amend_from, changed_fields, rows_updated, submit=False):
 
 def create_comparator_doc(doctype_name, document):
 	comparator = frappe.new_doc("Audit Trail")
-	args_dict = {
-		"doctype_name": doctype_name,
-		"document": document,
-		"start_date": today(),
-		"end_date": today(),
-	}
-	comparator.update(args_dict)
+	comparator.doctype_name = doctype_name
+	comparator.document = document
 	return comparator

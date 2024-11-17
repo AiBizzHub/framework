@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -6,6 +6,7 @@ from frappe import _
 from frappe.core.doctype.submission_queue.submission_queue import queue_submission
 from frappe.model.document import Document
 from frappe.utils import cint
+from frappe.utils.deprecations import deprecated
 from frappe.utils.scheduler import is_scheduler_inactive
 
 
@@ -23,6 +24,7 @@ class BulkUpdate(Document):
 		field: DF.Literal[None]
 		limit: DF.Int
 		update_value: DF.SmallText
+
 	# end: auto-generated types
 
 	@frappe.whitelist()
@@ -110,4 +112,7 @@ def _bulk_action(doctype, docnames, action, data, task_id=None):
 	return failed
 
 
-from frappe.deprecation_dumpster import show_progress
+@deprecated
+def show_progress(docnames, message, i, description):
+	n = len(docnames)
+	frappe.publish_progress(float(i) * 100 / n, title=message, description=description)

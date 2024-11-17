@@ -14,12 +14,9 @@ Example:
 
 
 """
-
 import json
 import os
-import typing
 from datetime import datetime
-from functools import singledispatchmethod
 
 import click
 
@@ -41,7 +38,6 @@ from frappe.model.base_document import (
 from frappe.model.document import Document
 from frappe.model.workflow import get_workflow_name
 from frappe.modules import load_doctype_module
-from frappe.types import DocRef
 from frappe.utils import cast, cint, cstr
 
 DEFAULT_FIELD_LABELS = {
@@ -59,20 +55,10 @@ DEFAULT_FIELD_LABELS = {
 }
 
 
-def get_meta(doctype: str | DocRef | Document, cached=True) -> "_Meta":
-	"""Get metadata for a doctype.
-
-	Args:
-	    doctype: The doctype as a string, DocRef, or Document object.
-	    cached: Whether to use cached metadata (default: True).
-
-	Returns:
-	    Meta object for the given doctype.
-	"""
-	doctype_name = getattr(doctype, "doctype", doctype)
-	if cached and not isinstance(doctype, Document):
-		if meta := frappe.cache.hget("doctype_meta", doctype_name):
-			return meta
+def get_meta(doctype, cached=True) -> "Meta":
+	cached = cached and isinstance(doctype, str)
+	if cached and (meta := frappe.cache.hget("doctype_meta", doctype)):
+		return meta
 
 	meta = Meta(doctype)
 	frappe.cache.hset("doctype_meta", meta.name, meta)
@@ -124,23 +110,12 @@ class Meta(Document):
 		frappe._dict(fieldname="owner", fieldtype="Data"),
 	)
 
-	@singledispatchmethod
-	def __init__(self, arg):
-		raise TypeError(f"Unsupported argument type: {type(arg)}")
+	def __init__(self, doctype):
+		if isinstance(doctype, Document):
+			super().__init__(doctype.as_dict())
+		else:
+			super().__init__("DocType", doctype)
 
-	@__init__.register(str)
-	def _(self, doctype):
-		super().__init__("DocType", doctype)
-		self.process()
-
-	@__init__.register(DocRef)
-	def _(self, doc_ref):
-		super().__init__("DocType", doc_ref.doctype)
-		self.process()
-
-	@__init__.register(Document)
-	def _(self, doc):
-		super().__init__(doc.as_dict())
 		self.process()
 
 	def load_from_db(self):
@@ -231,7 +206,7 @@ class Meta(Document):
 		return self._table_fields
 
 	def get_global_search_fields(self):
-		"""Return list of fields with `in_global_search` set and `name` if set."""
+		"""Returns list of fields with `in_global_search` set and `name` if set"""
 		fields = self.get("fields", {"in_global_search": 1, "fieldtype": ["not in", no_value_fields]})
 		if getattr(self, "show_name_in_global_search", None):
 			fields.append(frappe._dict(fieldtype="Data", fieldname="name", label="Name"))
@@ -245,43 +220,28 @@ class Meta(Document):
 				self._valid_columns = get_table_columns(self.name)
 			else:
 				self._valid_columns = self.default_fields + [
-					df.fieldname
-					for df in self.get("fields")
-					if not df.get("is_virtual") and df.fieldtype in data_fieldtypes
+					df.fieldname for df in self.get("fields") if df.fieldtype in data_fieldtypes
 				]
 				if self.istable:
 					self._valid_columns += list(child_table_fields)
 
 		return self._valid_columns
 
-	def get_valid_fields(self) -> list[str]:
-		if not hasattr(self, "_valid_fields"):
-			if (frappe.flags.in_install or frappe.flags.in_migrate) and self.name in self.special_doctypes:
-				self._valid_fields = get_table_columns(self.name)
-			else:
-				self._valid_fields = self.default_fields + [
-					df.fieldname for df in self.get("fields") if df.fieldtype in data_fieldtypes
-				]
-				if self.istable:
-					self._valid_fields += list(child_table_fields)
-
-		return self._valid_fields
-
 	def get_table_field_doctype(self, fieldname):
 		return TABLE_DOCTYPES_FOR_DOCTYPE.get(fieldname)
 
 	def get_field(self, fieldname):
-		"""Return docfield from meta."""
+		"""Return docfield from meta"""
 
 		return self._fields.get(fieldname)
 
 	def has_field(self, fieldname):
-		"""Return True if fieldname exists."""
+		"""Returns True if fieldname exists"""
 
 		return fieldname in self._fields
 
 	def get_label(self, fieldname):
-		"""Return label of the given fieldname."""
+		"""Get label of the given fieldname"""
 		if df := self.get_field(fieldname):
 			return df.get("label")
 
@@ -311,8 +271,8 @@ class Meta(Document):
 		return search_fields
 
 	def get_fields_to_fetch(self, link_fieldname=None):
-		"""Return a list of docfield objects for fields whose values
-		are to be fetched and updated for a particular link field.
+		"""Returns a list of docfield objects for fields whose values
+		are to be fetched and updated for a particular link field
 
 		These fields are of type Data, Link, Text, Readonly and their
 		fetch_from property is set as `link_fieldname`.`source_fieldname`"""
@@ -520,7 +480,7 @@ class Meta(Document):
 					field_order = fields_to_prepend
 
 		existing_fields = set(field_order) if field_order else False
-		insertion_map = {}
+		insert_after_map = {}
 
 		for index, field in enumerate(self.fields):
 			if existing_fields and field.fieldname in existing_fields:
@@ -529,29 +489,19 @@ class Meta(Document):
 			if not getattr(field, "is_custom_field", False):
 				if existing_fields:
 					# compute insert_after from previous field
-					insertion_map.setdefault(self.fields[index - 1].fieldname, []).append(field.fieldname)
+					insert_after_map.setdefault(self.fields[index - 1].fieldname, []).append(field.fieldname)
 				else:
 					field_order.append(field.fieldname)
 
-			elif target_position := getattr(field, "insert_after", None):
-				original_target = target_position
-				if field.fieldtype in ["Section Break", "Column Break"] and target_position in field_order:
-					# Find the next section or column break and set target_position to just one field before
-					for current_field in field_order[field_order.index(target_position) + 1 :]:
-						if self._fields[current_field].fieldtype == "Section Break" or (
-							self._fields[current_field].fieldtype == self._fields[original_target].fieldtype
-						):
-							# Break out to add this just after the last field
-							break
-						target_position = current_field
-				insertion_map.setdefault(target_position, []).append(field.fieldname)
+			elif insert_after := getattr(field, "insert_after", None):
+				insert_after_map.setdefault(insert_after, []).append(field.fieldname)
 
 			else:
 				# if custom field is at the top, insert after is None
 				field_order.insert(0, field.fieldname)
 
-		if insertion_map:
-			_update_field_order_based_on_insert_after(field_order, insertion_map)
+		if insert_after_map:
+			_update_field_order_based_on_insert_after(field_order, insert_after_map)
 
 		self._update_fields_based_on_order(field_order)
 
@@ -678,11 +628,11 @@ class Meta(Document):
 		return permissions
 
 	def get_dashboard_data(self):
-		"""Return dashboard setup related to this doctype.
+		"""Returns dashboard setup related to this doctype.
 
 		This method will return the `data` property in the `[doctype]_dashboard.py`
 		file in the doctype's folder, along with any overrides or extensions
-		implemented in other AiBizzApp applications via hooks.
+		implemented in other Frappe applications via hooks.
 		"""
 		data = frappe._dict()
 		if not self.custom:
@@ -755,7 +705,7 @@ class Meta(Document):
 		return self.get_web_template(suffix="_list")
 
 	def get_web_template(self, suffix=""):
-		"""Return the relative path of the row template for this doctype."""
+		"""Returns the relative path of the row template for this doctype"""
 		module_name = frappe.scrub(self.module)
 		doctype = frappe.scrub(self.name)
 		template_path = frappe.get_module_path(
@@ -845,7 +795,7 @@ def get_field_currency(df, doc=None):
 
 def get_field_precision(df, doc=None, currency=None):
 	"""get precision based on DocField options and fieldvalue in doc"""
-	from frappe.locale import get_number_format
+	from frappe.utils import get_number_format_info
 
 	if df.precision:
 		precision = cint(df.precision)
@@ -853,8 +803,8 @@ def get_field_precision(df, doc=None, currency=None):
 	elif df.fieldtype == "Currency":
 		precision = cint(frappe.db.get_default("currency_precision"))
 		if not precision:
-			number_format = get_number_format()
-			precision = number_format.precision
+			number_format = frappe.db.get_default("number_format") or "#,###.##"
+			decimal_str, comma_str, precision = get_number_format_info(number_format)
 	else:
 		precision = cint(frappe.db.get_default("float_precision")) or 3
 
@@ -868,9 +818,6 @@ def get_default_df(fieldname):
 
 		elif fieldname in ("idx", "docstatus"):
 			return frappe._dict(fieldname=fieldname, fieldtype="Int")
-
-		elif fieldname in ("owner", "modified_by"):
-			return frappe._dict(fieldname=fieldname, fieldtype="Link", options="User")
 
 		return frappe._dict(fieldname=fieldname, fieldtype="Data")
 
@@ -946,12 +893,3 @@ def _update_field_order_based_on_insert_after(field_order, insert_after_map):
 		# insert_after is an invalid fieldname, add these fields to the end
 		for fields in insert_after_map.values():
 			field_order.extend(fields)
-
-
-if typing.TYPE_CHECKING:
-	# This is DX hack to add all fields from DocType to meta for autocompletions.
-	# Meta is technically doctype + special fields on meta.
-	from frappe.core.doctype.doctype.doctype import DocType
-
-	class _Meta(Meta, DocType):
-		pass

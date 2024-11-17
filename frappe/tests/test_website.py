@@ -2,14 +2,14 @@ from unittest.mock import patch
 
 import frappe
 from frappe import get_hooks
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import set_request
 from frappe.website.page_renderers.static_page import StaticPage
 from frappe.website.serve import get_response, get_response_content
 from frappe.website.utils import build_response, clear_website_cache, get_home_page
 
 
-class TestWebsite(IntegrationTestCase):
+class TestWebsite(FrappeTestCase):
 	def setUp(self):
 		frappe.set_user("Guest")
 		self._clearRequest()
@@ -27,13 +27,17 @@ class TestWebsite(IntegrationTestCase):
 		frappe.set_user("Administrator")
 		# test home page via role
 		user = frappe.get_doc(
-			doctype="User", email="test-user-for-home-page@example.com", first_name="test"
+			dict(doctype="User", email="test-user-for-home-page@example.com", first_name="test")
 		).insert(ignore_if_duplicate=True)
 		user.reload()
 
-		role = frappe.get_doc(doctype="Role", role_name="home-page-test", desk_access=0).insert(
-			ignore_if_duplicate=True
-		)
+		role = frappe.get_doc(
+			dict(
+				doctype="Role",
+				role_name="home-page-test",
+				desk_access=0,
+			)
+		).insert(ignore_if_duplicate=True)
 
 		user.add_roles(role.name)
 		user.save()

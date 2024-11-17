@@ -50,7 +50,7 @@ def clear_sessions(user=None, keep_current=False, force=False):
 
 
 def get_sessions_to_clear(user=None, keep_current=False, force=False):
-	"""Return sessions of the current user. Called at login / logout.
+	"""Returns sessions of the current user. Called at login / logout
 
 	:param user: user name (default: current user)
 	:param keep_current: keep current session (default: false)
@@ -110,7 +110,7 @@ def clear_all_sessions(reason=None):
 
 
 def get_expired_sessions():
-	"""Return list of expired sessions."""
+	"""Returns list of expired sessions"""
 
 	sessions = frappe.qb.DocType("Sessions")
 	return (
@@ -169,10 +169,11 @@ def get():
 	bootinfo["disable_async"] = frappe.conf.disable_async
 
 	bootinfo["setup_complete"] = cint(frappe.get_system_settings("setup_complete"))
+	apps = get_apps() or []
 	bootinfo["apps_data"] = {
-		"apps": get_apps() or [],
-		"is_desk_apps": 1 if bool(is_desk_apps(get_apps())) else 0,
-		"default_path": get_default_path() or "",
+		"apps": apps,
+		"is_desk_apps": 1 if bool(is_desk_apps(apps)) else 0,
+		"default_path": get_default_path(apps) or "",
 	}
 
 	bootinfo["desk_theme"] = frappe.db.get_value("User", frappe.session.user, "desk_theme") or "Light"
@@ -279,15 +280,7 @@ class Session:
 		(
 			frappe.qb.into(Sessions)
 			.columns(Sessions.sessiondata, Sessions.user, Sessions.lastupdate, Sessions.sid, Sessions.status)
-			.insert(
-				(
-					frappe.as_json(self.data["data"], indent=None, separators=(",", ":")),
-					self.data["user"],
-					now,
-					self.data["sid"],
-					"Active",
-				)
-			)
+			.insert((str(self.data["data"]), self.data["user"], now, self.data["sid"], "Active"))
 		).run()
 		frappe.cache.hset("session", self.data.sid, self.data)
 
@@ -363,7 +356,7 @@ class Session:
 		).run()
 
 		if record:
-			data = frappe.parse_json(record[0][1] or "{}")
+			data = frappe._dict(frappe.safe_eval(record and record[0][1] or "{}"))
 			data.user = record[0][0]
 		else:
 			self._delete_session()
@@ -402,10 +395,7 @@ class Session:
 			(
 				frappe.qb.update(Sessions)
 				.where(Sessions.sid == self.data["sid"])
-				.set(
-					Sessions.sessiondata,
-					frappe.as_json(self.data["data"], indent=None, separators=(",", ":")),
-				)
+				.set(Sessions.sessiondata, str(self.data["data"]))
 				.set(Sessions.lastupdate, now)
 			).run()
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import datetime
@@ -7,6 +7,7 @@ import json
 import frappe
 from frappe import _
 from frappe.boot import get_allowed_report_names
+from frappe.config import get_modules_from_all_apps_for_user
 from frappe.model.document import Document
 from frappe.model.naming import append_number_if_name_exists
 from frappe.modules.export_file import export_to_files
@@ -19,7 +20,6 @@ from frappe.utils.dateutils import (
 	get_period,
 	get_period_beginning,
 )
-from frappe.utils.modules import get_modules_from_all_apps_for_user
 
 
 def get_permission_query_conditions(user):
@@ -279,16 +279,6 @@ def get_group_by_chart_config(chart, filters) -> dict | None:
 		ignore_ifnull=True,
 	)
 
-	group_by_field_field = frappe.get_meta(doctype).get_field(
-		group_by_field
-	)  # get info about @group_by_field
-
-	if data and group_by_field_field.fieldtype == "Link":  # if @group_by_field is link
-		title_field = frappe.get_meta(group_by_field_field.options)  # get title field
-		if title_field.title_field:  # if has title_field
-			for item in data:  # replace chart labels from name to title value
-				item.name = frappe.get_value(group_by_field_field.options, item.name, title_field.title_field)
-
 	if data:
 		return {
 			"labels": [item.get("name", "Not Specified") for item in data],
@@ -316,7 +306,7 @@ def get_result(data, timegrain, from_date, to_date, chart_type):
 				d[1] += cint(data[data_index][1])
 				count += cint(data[data_index][2])
 				data_index += 1
-			if chart_type == "Average" and count != 0:
+			if chart_type == "Average" and not count == 0:
 				d[1] = d[1] / count
 			if chart_type == "Count":
 				d[1] = count
@@ -375,8 +365,8 @@ class DashboardChart(Document):
 		value_based_on: DF.Literal[None]
 		x_field: DF.Literal[None]
 		y_axis: DF.Table[DashboardChartField]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def on_update(self):
 		frappe.cache.delete_key(f"chart-data:{self.name}")
 		if frappe.conf.developer_mode and self.is_standard:

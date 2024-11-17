@@ -11,7 +11,7 @@ def get_jenv():
 
 		UNSAFE_ATTRIBUTES = UNSAFE_ATTRIBUTES - {"format", "format_map"}
 
-		class AiBizzAppSandboxedEnvironment(SandboxedEnvironment):
+		class FrappeSandboxedEnvironment(SandboxedEnvironment):
 			def is_safe_attribute(self, obj, attr, *args, **kwargs):
 				if attr in UNSAFE_ATTRIBUTES:
 					return False
@@ -19,7 +19,7 @@ def get_jenv():
 				return super().is_safe_attribute(obj, attr, *args, **kwargs)
 
 		# frappe will be loaded last, so app templates will get precedence
-		jenv = AiBizzAppSandboxedEnvironment(loader=get_jloader(), undefined=DebugUndefined)
+		jenv = FrappeSandboxedEnvironment(loader=get_jloader(), undefined=DebugUndefined)
 		set_filters(jenv)
 
 		jenv.globals.update(get_safe_globals())
@@ -156,7 +156,7 @@ def set_filters(jenv):
 
 
 def get_jinja_hooks():
-	"""Return a tuple of (methods, filters) each containing a dict of method name and method definition pair."""
+	"""Returns a tuple of (methods, filters) each containing a dict of method name and method definition pair."""
 	import frappe
 
 	if not getattr(frappe.local, "site", None):

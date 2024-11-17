@@ -3,7 +3,7 @@ from unittest.mock import mock_open, patch
 
 import frappe
 from frappe.modules import patch_handler
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 EMTPY_FILE = ""
 EMTPY_SECTION = """
@@ -48,7 +48,7 @@ app.module.patch4
 """
 
 
-class TestPatches(IntegrationTestCase):
+class TestPatches(FrappeTestCase):
 	def test_patch_module_names(self):
 		frappe.flags.final_patches = []
 		frappe.flags.in_install = True
@@ -78,7 +78,7 @@ class TestPatches(IntegrationTestCase):
 		self.assertGreaterEqual(finished_patches, len(all_patches))
 
 
-class TestPatchReader(IntegrationTestCase):
+class TestPatchReader(FrappeTestCase):
 	def get_patches(self):
 		return (
 			patch_handler.get_patches_from_app("frappe"),

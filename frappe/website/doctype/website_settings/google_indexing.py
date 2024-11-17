@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 
@@ -36,7 +36,7 @@ def authorize_access(reauthorize=False, code=None):
 
 
 def get_google_indexing_object():
-	"""Return an object of Google Indexing object."""
+	"""Returns an object of Google Indexing object."""
 	account = frappe.get_doc("Website Settings")
 	oauth_obj = GoogleOAuth("indexing")
 

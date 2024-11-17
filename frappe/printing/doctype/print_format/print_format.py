@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -47,6 +47,7 @@ class PrintFormat(Document):
 		raw_printing: DF.Check
 		show_section_headings: DF.Check
 		standard: DF.Literal["No", "Yes"]
+
 	# end: auto-generated types
 
 	def onload(self):

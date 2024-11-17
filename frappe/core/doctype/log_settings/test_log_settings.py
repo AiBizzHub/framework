@@ -1,24 +1,15 @@
-# Copyright (c) 2022, AiBizzApp Technologies and Contributors
+# Copyright (c) 2022, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 
 from datetime import datetime
 
 import frappe
 from frappe.core.doctype.log_settings.log_settings import _supports_log_clearing, run_log_clean_up
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import add_to_date, now_datetime
 
 
-class UnitTestLogSettings(UnitTestCase):
-	"""
-	Unit tests for LogSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestLogSettings(IntegrationTestCase):
+class TestLogSettings(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()

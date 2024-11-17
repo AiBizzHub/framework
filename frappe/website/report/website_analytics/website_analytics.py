@@ -1,4 +1,4 @@
-# Copyright (c) 2013, AiBizzApp Technologies and contributors
+# Copyright (c) 2013, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from datetime import datetime

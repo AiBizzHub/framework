@@ -363,7 +363,7 @@ frappe.setup.SetupWizardSlide = class SetupWizardSlide extends frappe.ui.Slide {
 	}
 };
 
-// AiBizzApp slides settings
+// Frappe slides settings
 // ======================================================
 frappe.setup.slides_settings = [
 	{
@@ -397,6 +397,7 @@ frappe.setup.slides_settings = [
 				fieldtype: "Select",
 				reqd: 1,
 			},
+			{ fieldtype: "Column Break" },
 			{
 				fieldname: "currency",
 				label: __("Currency"),

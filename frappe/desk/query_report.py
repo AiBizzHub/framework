@@ -124,7 +124,7 @@ def generate_report_result(
 
 
 def normalize_result(result, columns):
-	# Convert to list of dicts from list of lists/tuples
+	# Converts to list of dicts from list of lists/tuples
 	data = []
 	column_names = [column["fieldname"] for column in columns]
 	if result and isinstance(result[0], list | tuple):
@@ -195,10 +195,10 @@ def run(
 	parent_field=None,
 	are_default_filters=True,
 ):
-	if not user:
-		user = frappe.session.user
 	validate_filters_permissions(report_name, filters, user)
 	report = get_report_doc(report_name)
+	if not user:
+		user = frappe.session.user
 	if not frappe.has_permission(report.ref_doctype, "report"):
 		frappe.msgprint(
 			_("Must have report permission to access this report."),
@@ -635,11 +635,11 @@ def has_match(
 	columns_dict,
 	user,
 ):
-	"""Return True if after evaluating permissions for each linked doctype:
-	        - There is an owner match for the ref_doctype
-	        - `and` There is a user permission match for all linked doctypes
+	"""Returns True if after evaluating permissions for each linked doctype
+	- There is an owner match for the ref_doctype
+	- `and` There is a user permission match for all linked doctypes
 
-	Return True if the row is empty.
+	Returns True if the row is empty
 
 	Note:
 	Each doctype could have multiple conflicting user permission doctypes.
@@ -737,10 +737,9 @@ def get_linked_doctypes(columns, data):
 
 
 def get_columns_dict(columns):
-	"""Return a dict with column docfield values as dict.
-
+	"""Returns a dict with column docfield values as dict
 	The keys for the dict are both idx and fieldname,
-	so either index or fieldname can be used to search for a column's docfield properties.
+	so either index or fieldname can be used to search for a column's docfield properties
 	"""
 	columns_dict = frappe._dict()
 	for idx, col in enumerate(columns):
@@ -799,9 +798,7 @@ def validate_filters_permissions(report_name, filters=None, user=None):
 	for field in report.filters:
 		if field.fieldname in filters and field.fieldtype == "Link":
 			linked_doctype = field.options
-			if not has_permission(
-				doctype=linked_doctype, ptype="select", doc=filters[field.fieldname], user=user
-			):
+			if not has_permission(doctype=linked_doctype, doc=filters[field.fieldname], user=user):
 				frappe.throw(
 					_("You do not have permission to access {0}: {1}.").format(
 						linked_doctype, filters[field.fieldname]

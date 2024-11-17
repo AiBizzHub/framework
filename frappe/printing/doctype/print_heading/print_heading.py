@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -17,5 +17,4 @@ class PrintHeading(Document):
 		description: DF.SmallText | None
 		print_heading: DF.Data
 	# end: auto-generated types
-
 	pass

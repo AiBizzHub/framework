@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from typing import TYPE_CHECKING
@@ -25,8 +25,8 @@ class DocTypeLayout(Document):
 		document_type: DF.Link
 		fields: DF.Table[DocTypeLayoutField]
 		route: DF.Data
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if not self.route:
 			self.route = slug(self.name)

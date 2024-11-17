@@ -1,7 +1,7 @@
 context.skip("Permissions API", () => {
 	before(() => {
 		cy.visit("/login");
-		cy.remove_role("frappe@example.com", "System Manager");
+		cy.remove_role("aibizzapp@example.com", "System Manager");
 		cy.visit("/app");
 	});
 
@@ -35,7 +35,7 @@ context.skip("Permissions API", () => {
 	});
 
 	after(() => {
-		cy.add_role("frappe@example.com", "System Manager");
+		cy.add_role("aibizzapp@example.com", "System Manager");
 		cy.call("logout");
 	});
 });

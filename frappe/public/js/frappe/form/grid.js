@@ -71,8 +71,13 @@ export default class Grid {
 						<div class="grid-heading-row"></div>
 						<div class="grid-body">
 							<div class="rows"></div>
-							<div class="grid-empty text-center text-extra-muted">
-								${__("No rows")}
+							<div class="grid-empty text-center">
+								<img
+									src="/assets/frappe/images/ui-states/grid-empty-state.svg"
+									alt="Grid Empty State"
+									class="grid-empty-illustration"
+								>
+								${__("No Data")}
 							</div>
 						</div>
 					</div>
@@ -304,11 +309,6 @@ export default class Grid {
 			select_all_checkbox_checked && this.data.length > this.get_selected_children().length;
 		this.remove_all_rows_button.toggleClass("hidden", !show_delete_all_btn);
 	}
-
-	debounced_refresh_remove_rows_button = frappe.utils.debounce(
-		this.refresh_remove_rows_button,
-		100
-	);
 
 	get_selected() {
 		return (this.grid_rows || [])

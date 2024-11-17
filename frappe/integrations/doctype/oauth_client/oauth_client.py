@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -28,8 +28,8 @@ class OAuthClient(Document):
 		scopes: DF.Text
 		skip_authorization: DF.Check
 		user: DF.Link | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.client_id = self.name
 		if not self.client_secret:

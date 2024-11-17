@@ -1,16 +1,9 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Deleted Document')
 
 
-class UnitTestDeletedDocument(UnitTestCase):
-	"""
-	Unit tests for DeletedDocument.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestDeletedDocument(IntegrationTestCase):
+class TestDeletedDocument(FrappeTestCase):
 	pass

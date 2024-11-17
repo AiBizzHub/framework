@@ -47,16 +47,16 @@ export default class ChartWidget extends Widget {
 		}
 
 		this.loading = $(
-			`<div class="chart-loading-state text-extra-muted" style="height: ${
-				this.height
-			}px;">${__("Loading...")}</div>`
+			`<div class="chart-loading-state text-muted" style="height: ${this.height}px;">${__(
+				"Loading..."
+			)}</div>`
 		);
 		this.loading.appendTo(this.body);
 
 		this.empty = $(
-			`<div class="chart-loading-state text-extra-muted" style="height: ${
-				this.height
-			}px;">${__("No Data")}</div>`
+			`<div class="chart-loading-state text-muted" style="height: ${this.height}px;">${__(
+				"No Data"
+			)}</div>`
 		);
 		this.empty.hide().appendTo(this.body);
 
@@ -125,7 +125,7 @@ export default class ChartWidget extends Widget {
 		if (this.chart_doc.type == "Heatmap") {
 			filters = [
 				{
-					label: __(this.chart_settings.heatmap_year) || __(this.chart_doc.heatmap_year),
+					label: this.chart_settings.heatmap_year || this.chart_doc.heatmap_year,
 					options: frappe.dashboard_utils.get_years_since_creation(
 						frappe.boot.user.creation
 					),
@@ -141,8 +141,7 @@ export default class ChartWidget extends Widget {
 		} else {
 			filters = [
 				{
-					label:
-						__(this.chart_settings.time_interval) || __(this.chart_doc.time_interval),
+					label: this.chart_settings.time_interval || this.chart_doc.time_interval,
 					options: ["Yearly", "Quarterly", "Monthly", "Weekly", "Daily"],
 					icon: "calendar",
 					class: "time-interval-filter",
@@ -234,7 +233,7 @@ export default class ChartWidget extends Widget {
 				df: {
 					fieldtype: "DateRange",
 					fieldname: "from_date",
-					placeholder: __("Date Range"),
+					placeholder: "Date Range",
 					input_class: "input-xs",
 					default: [this.chart_settings.from_date, this.chart_settings.to_date],
 					value: [this.chart_settings.from_date, this.chart_settings.to_date],
@@ -315,7 +314,7 @@ export default class ChartWidget extends Widget {
 
 		if (this.chart_doc.document_type) {
 			actions.push({
-				label: __("{0} List", [__(this.chart_doc.document_type)]),
+				label: __("{0} List", [this.chart_doc.document_type]),
 				action: "action-list",
 				handler: () => {
 					frappe.set_route("List", this.chart_doc.document_type);
@@ -323,7 +322,7 @@ export default class ChartWidget extends Widget {
 			});
 		} else if (this.chart_doc.chart_type === "Report") {
 			actions.push({
-				label: __("{0} Report", [__(this.chart_doc.report_name)]),
+				label: __("{0} Report", [this.chart_doc.report_name]),
 				action: "action-list",
 				handler: () => {
 					frappe.set_route("query-report", this.chart_doc.report_name, this.filters);
@@ -393,7 +392,7 @@ export default class ChartWidget extends Widget {
 	setup_filter_dialog(fields) {
 		let me = this;
 		let dialog = new frappe.ui.Dialog({
-			title: __("Set Filters for {0}", [__(this.chart_doc.chart_name)]),
+			title: __("Set Filters for {0}", [this.chart_doc.chart_name]),
 			fields: fields,
 			primary_action: function () {
 				let values = this.get_values();
@@ -404,7 +403,7 @@ export default class ChartWidget extends Widget {
 					me.fetch_and_update_chart();
 				}
 			},
-			primary_action_label: __("Set"),
+			primary_action_label: "Set",
 		});
 
 		dialog.show();
@@ -474,9 +473,7 @@ export default class ChartWidget extends Widget {
 				${actions
 					.map(
 						(action) =>
-							`<li><a class="dropdown-item" data-action="${action.action}">${__(
-								action.label
-							)}</a></li>`
+							`<li><a class="dropdown-item" data-action="${action.action}">${action.label}</a></li>`
 					)
 					.join("")}
 			</ul>
@@ -597,12 +594,6 @@ export default class ChartWidget extends Widget {
 		if (this.chart_doc.chart_type == "Report" && this.report_result?.chart?.fieldtype) {
 			fieldtype = this.report_result.chart.fieldtype;
 			options = this.report_result.chart.options;
-		}
-
-		if (this.chart_doc.chart_type == "Custom" && this.chart_doc.custom_options) {
-			let chart_options = JSON.parse(this.chart_doc.custom_options);
-			fieldtype = chart_options.fieldtype;
-			options = chart_options.options;
 		}
 
 		chart_args.tooltipOptions = {

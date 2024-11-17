@@ -177,11 +177,6 @@ function is_filter_applied() {
 	}
 }
 
-function open_child_doctype() {
-	if (!props.field?.df?.options) return;
-	window.open(`/app/doctype/${props.field.df.options}`, "_blank");
-}
-
 onMounted(() => selected.value && label_input.value.focus_on_label());
 </script>
 
@@ -196,7 +191,6 @@ onMounted(() => selected.value && label_input.value.focus_on_label());
 		<component
 			:is="component"
 			:df="field.df"
-			:is-customize-form="store.is_customize_form"
 			:data-fieldname="field.df.fieldname"
 			:data-fieldtype="field.df.fieldtype"
 		>
@@ -214,7 +208,7 @@ onMounted(() => selected.value && label_input.value.focus_on_label());
 						class="help-icon"
 						v-if="field.df.documentation_url"
 						v-html="frappe.utils.icon('help', 'sm')"
-					/>
+					></div>
 				</div>
 			</template>
 			<template #actions>
@@ -225,7 +219,7 @@ onMounted(() => selected.value && label_input.value.focus_on_label());
 						:class="is_filter_applied()"
 						@click="edit_filters"
 					>
-						<div v-html="frappe.utils.icon('filter', 'sm')" />
+						<div v-html="frappe.utils.icon('filter', 'sm')"></div>
 					</button>
 					<AddFieldButton ref="add_field_ref" :column="column" :field="field">
 						<div v-html="frappe.utils.icon('add', 'sm')" />
@@ -238,29 +232,21 @@ onMounted(() => selected.value && label_input.value.focus_on_label());
 						"
 						@click="move_fields_to_column"
 					>
-						<div v-html="frappe.utils.icon('move', 'sm')" />
+						<div v-html="frappe.utils.icon('move', 'sm')"></div>
 					</button>
 					<button
 						class="btn btn-xs btn-icon"
 						:title="__('Duplicate field')"
 						@click.stop="duplicate_field"
 					>
-						<div v-html="frappe.utils.icon('duplicate', 'sm')" />
-					</button>
-					<button
-						v-if="field.df.fieldtype === 'Table' && field.df.options"
-						class="btn btn-xs btn-icon"
-						@click="open_child_doctype"
-						:title="__('Edit the {0} Doctype', [field.df.options])"
-					>
-						<div v-html="frappe.utils.icon('external-link', 'sm')" />
+						<div v-html="frappe.utils.icon('duplicate', 'sm')"></div>
 					</button>
 					<button
 						class="btn btn-xs btn-icon"
 						:title="__('Remove field')"
 						@click.stop="remove_field"
 					>
-						<div v-html="frappe.utils.icon('remove', 'sm')" />
+						<div v-html="frappe.utils.icon('remove', 'sm')"></div>
 					</button>
 				</div>
 			</template>

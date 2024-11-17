@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -15,7 +15,17 @@ class KanbanBoardColumn(Document):
 
 		column_name: DF.Data | None
 		indicator: DF.Literal[
-			"Blue", "Cyan", "Gray", "Green", "Light Blue", "Orange", "Pink", "Purple", "Red", "Yellow"
+			"Blue",
+			"Cyan",
+			"Gray",
+			"Green",
+			"Light Blue",
+			"Orange",
+			"Pink",
+			"Purple",
+			"Red",
+			"Red",
+			"Yellow",
 		]
 		order: DF.Code | None
 		parent: DF.Data
@@ -23,5 +33,4 @@ class KanbanBoardColumn(Document):
 		parenttype: DF.Data
 		status: DF.Literal["Active", "Archived"]
 	# end: auto-generated types
-
 	pass

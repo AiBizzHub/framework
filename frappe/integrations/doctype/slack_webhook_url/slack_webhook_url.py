@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -32,7 +32,6 @@ class SlackWebhookURL(Document):
 		webhook_name: DF.Data
 		webhook_url: DF.Data
 	# end: auto-generated types
-
 	pass
 
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from jinja2 import TemplateSyntaxError
@@ -51,8 +51,8 @@ class Address(Document):
 		phone: DF.Data | None
 		pincode: DF.Data | None
 		state: DF.Data | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def __setup__(self):
 		self.flags.linked = False
 
@@ -141,7 +141,7 @@ def get_preferred_address(doctype, name, preferred_key="is_primary_address"):
 
 @frappe.whitelist()
 def get_default_address(doctype: str, name: str | None, sort_key: str = "is_primary_address") -> str | None:
-	"""Return default Address name for the given doctype, name."""
+	"""Returns default Address name for the given doctype, name"""
 	if sort_key not in ["is_shipping_address", "is_primary_address"]:
 		return None
 
@@ -223,7 +223,7 @@ def get_address_list(doctype, txt, filters, limit_start, limit_page_length=20, o
 
 
 def has_website_permission(doc, ptype, user, verbose=False):
-	"""Return True if there is a related lead or contact related to this document."""
+	"""Returns true if there is a related lead or contact related to this document"""
 	contact_name = frappe.db.get_value("Contact", {"email_id": frappe.session.user})
 
 	if contact_name:
@@ -264,34 +264,82 @@ def get_company_address(company):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def address_query(doctype, txt, searchfield, start, page_len, filters):
-	from frappe.desk.search import search_widget
+	from frappe.desk.reportview import get_match_cond
 
-	_filters = []
-	if link_doctype := filters.pop("link_doctype", None):
-		_filters.append(["Dynamic Link", "link_doctype", "=", link_doctype])
+	doctype = "Address"
+	link_doctype = filters.pop("link_doctype")
+	link_name = filters.pop("link_name")
 
-	if link_name := filters.pop("link_name", None):
-		_filters.append(["Dynamic Link", "link_name", "=", link_name])
+	condition = ""
+	meta = frappe.get_meta(doctype)
+	for fieldname, value in filters.items():
+		if meta.get_field(fieldname) or fieldname in frappe.db.DEFAULT_COLUMNS:
+			condition += f" and {fieldname}={frappe.db.escape(value)}"
 
-	_filters.extend([key, "=", value] for key, value in filters.items())
+	searchfields = meta.get_search_fields()
 
-	return search_widget(
-		"Address", txt, filters=_filters, searchfield=searchfield, start=start, page_length=page_len
+	if searchfield and (meta.get_field(searchfield) or searchfield in frappe.db.DEFAULT_COLUMNS):
+		searchfields.append(searchfield)
+
+	search_condition = ""
+	for field in searchfields:
+		if search_condition == "":
+			search_condition += f"`tabAddress`.`{field}` like %(txt)s"
+		else:
+			search_condition += f" or `tabAddress`.`{field}` like %(txt)s"
+
+	# Use custom title field if set
+	if meta.show_title_field_in_link and meta.title_field:
+		title = f"`tabAddress`.{meta.title_field}"
+	else:
+		title = "`tabAddress`.city"
+
+	# Get additional search fields
+	if searchfields:
+		extra_query_fields = ",".join([f"`tabAddress`.{field}" for field in searchfields])
+	else:
+		extra_query_fields = "`tabAddress`.country"
+
+	return frappe.db.sql(
+		"""select
+			`tabAddress`.name, {title}, {extra_query_fields}
+		from
+			`tabAddress`
+		join `tabDynamic Link`
+			on (`tabDynamic Link`.parent = `tabAddress`.name and `tabDynamic Link`.parenttype = 'Address')
+		where
+			`tabDynamic Link`.link_doctype = %(link_doctype)s and
+			`tabDynamic Link`.link_name = %(link_name)s and
+			ifnull(`tabAddress`.disabled, 0) = 0 and
+			({search_condition})
+			{mcond} {condition}
+		order by
+			case
+				when locate(%(_txt)s, `tabAddress`.name) != 0
+				then locate(%(_txt)s, `tabAddress`.name)
+				else 99999
+			end,
+			`tabAddress`.idx desc, `tabAddress`.name
+		limit %(page_len)s offset %(start)s""".format(
+			mcond=get_match_cond(doctype),
+			search_condition=search_condition,
+			condition=condition or "",
+			title=title,
+			extra_query_fields=extra_query_fields,
+		),
+		{
+			"txt": "%" + txt + "%",
+			"_txt": txt.replace("%", ""),
+			"start": start,
+			"page_len": page_len,
+			"link_name": link_name,
+			"link_doctype": link_doctype,
+		},
 	)
 
 
-def get_condensed_address(doc, no_title=False):
-	fields = [
-		"address_title",
-		"address_line1",
-		"address_line2",
-		"city",
-		"county",
-		"state",
-		"country",
-	]
-	if no_title:
-		fields.remove("address_title")
+def get_condensed_address(doc):
+	fields = ["address_title", "address_line1", "address_line2", "city", "county", "state", "country"]
 	return ", ".join(doc.get(d) for d in fields if doc.get(d))
 
 

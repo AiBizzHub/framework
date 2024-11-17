@@ -7,7 +7,9 @@ from frappe.geo.doctype.country.country import (
 	import_country_and_currency,
 )
 from frappe.geo.doctype.currency.currency import enable_default_currencies
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+test_records = frappe.get_test_records("Country")
 
 
 def get_table_snapshot(doctype):
@@ -20,16 +22,7 @@ def get_table_snapshot(doctype):
 	return data
 
 
-class UnitTestCountry(UnitTestCase):
-	"""
-	Unit tests for Country.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestCountry(IntegrationTestCase):
+class TestCountry(FrappeTestCase):
 	def test_bulk_insert_correctness(self):
 		def clear_tables():
 			frappe.db.delete("Currency")

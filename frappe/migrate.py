@@ -13,7 +13,6 @@ import frappe.modules.patch_handler
 import frappe.translate
 from frappe.cache_manager import clear_global_cache
 from frappe.core.doctype.language.language import sync_languages
-from frappe.core.doctype.navbar_settings.navbar_settings import sync_standard_items
 from frappe.core.doctype.scheduled_job_type.scheduled_job_type import sync_jobs
 from frappe.database.schema import add_column
 from frappe.deferred_insert import save_to_db as flush_deferred_inserts
@@ -131,47 +130,29 @@ class SiteMigration:
 		* Sync fixtures & custom scripts
 		* Sync in-Desk Module Dashboards
 		* Sync customizations: Custom Fields, Property Setters, Custom Permissions
-		* Sync AiBizzApp's internal language master
+		* Sync Frappe's internal language master
 		* Flush deferred inserts made during maintenance mode.
 		* Sync Portal Menu Items
 		* Sync Installed Applications Version History
 		* Execute `after_migrate` hooks
 		"""
-		print("Syncing jobs...")
 		sync_jobs()
-
-		print("Syncing fixtures...")
 		sync_fixtures()
-		sync_standard_items()
-
-		print("Syncing dashboards...")
 		sync_dashboards()
-
-		print("Syncing customizations...")
 		sync_customizations()
-
-		print("Syncing languages...")
 		sync_languages()
-
-		print("Flushing deferred inserts...")
 		flush_deferred_inserts()
-
-		print("Removing orphan doctypes...")
 		frappe.model.sync.remove_orphan_doctypes()
 
-		print("Syncing portal menu...")
 		frappe.get_single("Portal Settings").sync_menu()
-
-		print("Updating installed applications...")
 		frappe.get_single("Installed Applications").update_versions()
 
-		print("Executing `after_migrate` hooks...")
 		for app in frappe.get_installed_apps():
 			for fn in frappe.get_hooks("after_migrate", app_name=app):
 				frappe.get_attr(fn)()
 
 	def required_services_running(self) -> bool:
-		"""Return True if all required services are running. Return False and print
+		"""Returns True if all required services are running. Returns False and prints
 		instructions to stdout when required services are not available.
 		"""
 		service_status = check_connection(redis_services=["redis_cache"])
@@ -192,7 +173,7 @@ class SiteMigration:
 		from frappe.utils.synchronization import filelock
 
 		if site:
-			frappe.init(site)
+			frappe.init(site=site)
 			frappe.connect()
 
 		if not self.required_services_running():

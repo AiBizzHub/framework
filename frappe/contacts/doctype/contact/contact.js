@@ -1,4 +1,4 @@
-// Copyright (c) 2016, AiBizzApp Technologies and contributors
+// Copyright (c) 2016, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("Contact", {
@@ -92,17 +92,6 @@ frappe.ui.form.on("Contact", {
 					__("Links")
 				);
 			}
-		}
-
-		if (!frm.is_dirty()) {
-			frm.page.add_menu_item(__("Download vCard"), function () {
-				window.open(
-					`/api/method/frappe.contacts.doctype.contact.contact.download_vcard?contact=${encodeURIComponent(
-						frm.doc.name
-					)}`,
-					"_blank"
-				);
-			});
 		}
 	},
 	validate: function (frm) {

@@ -6,7 +6,7 @@ import pyotp
 
 import frappe
 from frappe.auth import HTTPRequest, get_login_attempt_tracker, validate_ip_address
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.twofactor import (
 	ExpiredLoginException,
 	authenticate_for_2factor,
@@ -20,19 +20,26 @@ from frappe.twofactor import (
 )
 from frappe.utils import cint, set_request
 
+from . import get_system_setting, update_system_settings
 
-class TestTwoFactor(IntegrationTestCase):
+
+class TestTwoFactor(FrappeTestCase):
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.default_allowed_login_attempts = get_system_setting("allow_consecutive_login_attempts")
+
 	def setUp(self):
 		self.http_requests = create_http_request()
 		self.login_manager = frappe.local.login_manager
 		self.user = self.login_manager.user
-		self.enterContext(self.change_settings("System Settings", {"allow_consecutive_login_attempts": 2}))
+		update_system_settings({"allow_consecutive_login_attempts": 2})
 
 	def tearDown(self):
 		frappe.local.response["verification"] = None
 		frappe.local.response["tmp_id"] = None
 		disable_2fa()
 		frappe.clear_cache(user=self.user)
+		update_system_settings({"allow_consecutive_login_attempts": self.default_allowed_login_attempts})
 
 	def test_should_run_2fa(self):
 		"""Should return true if enabled."""
@@ -132,10 +139,10 @@ class TestTwoFactor(IntegrationTestCase):
 
 	def test_render_string_template(self):
 		"""String template renders as expected with variables."""
-		args = {"issuer_name": "AiBizzApp Technologies"}
+		args = {"issuer_name": "AiBizzHub, LLC"}
 		_str = "Verification Code from {{issuer_name}}"
 		_str = frappe.render_template(_str, args)
-		self.assertEqual(_str, "Verification Code from AiBizzApp Technologies")
+		self.assertEqual(_str, "Verification Code from AiBizzHub, LLC")
 
 	def test_bypass_restict_ip(self):
 		"""

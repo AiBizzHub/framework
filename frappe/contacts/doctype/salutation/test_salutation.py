@@ -1,16 +1,7 @@
-# Copyright (c) 2017, AiBizzApp Technologies and Contributors
+# Copyright (c) 2017, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestSalutation(UnitTestCase):
-	"""
-	Unit tests for Salutation.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestSalutation(IntegrationTestCase):
+class TestSalutation(FrappeTestCase):
 	pass

@@ -4,11 +4,11 @@ import frappe
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from frappe.defaults import *
 from frappe.query_builder.utils import db_type_is
-from frappe.tests import IntegrationTestCase
 from frappe.tests.test_query_builder import run_only_if
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestDefaults(IntegrationTestCase):
+class TestDefaults(FrappeTestCase):
 	def test_global(self):
 		clear_user_default("key1")
 		set_global_default("key1", "value1")
@@ -60,7 +60,12 @@ class TestDefaults(IntegrationTestCase):
 		frappe.set_user(user)
 
 		perm_doc = frappe.get_doc(
-			doctype="User Permission", user=frappe.session.user, allow="Language", for_value="en-GB"
+			dict(
+				doctype="User Permission",
+				user=frappe.session.user,
+				allow="Language",
+				for_value="en-GB",
+			)
 		).insert(ignore_permissions=True)
 
 		self.assertEqual(get_global_default("language"), None)
@@ -79,7 +84,12 @@ class TestDefaults(IntegrationTestCase):
 		clear_user_default("Country")
 
 		perm_doc = frappe.get_doc(
-			doctype="User Permission", user=frappe.session.user, allow="Country", for_value="India"
+			dict(
+				doctype="User Permission",
+				user=frappe.session.user,
+				allow="Country",
+				for_value="India",
+			)
 		).insert(ignore_permissions=True)
 
 		frappe.db.set_value("User Permission", perm_doc.name, "is_default", 1)
@@ -91,7 +101,12 @@ class TestDefaults(IntegrationTestCase):
 		self.assertEqual(get_user_default("Country"), None)
 
 		perm_doc = frappe.get_doc(
-			doctype="User Permission", user=frappe.session.user, allow="Country", for_value="United States"
+			dict(
+				doctype="User Permission",
+				user=frappe.session.user,
+				allow="Country",
+				for_value="United States",
+			)
 		).insert(ignore_permissions=True)
 
 		self.assertEqual(get_user_default("Country"), "United States")

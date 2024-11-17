@@ -10,8 +10,6 @@ from urllib.parse import parse_qs, urlparse
 
 import cssutils
 import pdfkit
-
-pdfkit.source.unicode = str  # NOTE: upstream bug; PYTHONOPTIMIZE=1 optimized this away
 from bs4 import BeautifulSoup
 from packaging.version import Version
 from pypdf import PdfReader, PdfWriter
@@ -61,7 +59,7 @@ def pdf_body_html(template, args, **kwargs):
 
 
 def _guess_template_error_line_number(template) -> int | None:
-	"""Guess line on which exception occurred from current traceback."""
+	"""Guess line on which exception occured from current traceback."""
 	with contextlib.suppress(Exception):
 		import sys
 		import traceback

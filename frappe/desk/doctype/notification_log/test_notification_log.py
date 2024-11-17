@@ -1,21 +1,12 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
 from frappe.core.doctype.user.user import get_system_users
 from frappe.desk.form.assign_to import add as assign_task
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestNotificationLog(UnitTestCase):
-	"""
-	Unit tests for NotificationLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestNotificationLog(IntegrationTestCase):
+class TestNotificationLog(FrappeTestCase):
 	def test_assignment(self):
 		todo = get_todo()
 		user = get_user()

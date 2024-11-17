@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -19,5 +19,4 @@ class UserGroupMember(Document):
 		parenttype: DF.Data
 		user: DF.Link
 	# end: auto-generated types
-
 	pass

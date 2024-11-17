@@ -1,4 +1,4 @@
-# Copyright (c) 2023, AiBizzApp Technologies and contributors
+# Copyright (c) 2023, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -22,7 +22,6 @@ class CustomHTMLBlock(Document):
 		script: DF.Code | None
 		style: DF.Code | None
 	# end: auto-generated types
-
 	pass
 
 

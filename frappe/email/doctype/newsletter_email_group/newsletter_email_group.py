@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -19,5 +19,4 @@ class NewsletterEmailGroup(Document):
 		parenttype: DF.Data
 		total_subscribers: DF.ReadOnly | None
 	# end: auto-generated types
-
 	pass

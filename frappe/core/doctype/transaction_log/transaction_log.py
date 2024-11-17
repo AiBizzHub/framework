@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import hashlib
@@ -28,8 +28,8 @@ class TransactionLog(Document):
 		row_index: DF.Data | None
 		timestamp: DF.Datetime | None
 		transaction_hash: DF.SmallText | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def before_insert(self):
 		index = get_current_index()
 		self.row_index = index

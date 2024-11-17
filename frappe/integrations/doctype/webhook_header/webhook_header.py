@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -14,11 +14,10 @@ class WebhookHeader(Document):
 	if TYPE_CHECKING:
 		from frappe.types import DF
 
-		key: DF.SmallText | None
+		key: DF.Data | None
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		value: DF.SmallText | None
+		value: DF.Data | None
 	# end: auto-generated types
-
 	pass

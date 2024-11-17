@@ -1,7 +1,7 @@
 import re
 from ast import literal_eval
 from types import BuiltinFunctionType
-from typing import TYPE_CHECKING, TypeAlias
+from typing import TYPE_CHECKING
 
 import sqlparse
 from pypika.queries import QueryBuilder, Table
@@ -10,7 +10,7 @@ import frappe
 from frappe import _
 from frappe.database.operator_map import OPERATOR_MAP
 from frappe.database.schema import SPECIAL_CHAR_PATTERN
-from frappe.database.utils import DefaultOrderBy, FilterValue, convert_to_value, get_doctype_name
+from frappe.database.utils import DefaultOrderBy, get_doctype_name
 from frappe.query_builder import Criterion, Field, Order, functions
 from frappe.query_builder.functions import Function, SqlFunctions
 from frappe.query_builder.utils import PseudoColumnMapper
@@ -34,8 +34,8 @@ class Engine:
 	def get_query(
 		self,
 		table: str | Table,
-		fields: str | list | tuple | None = None,
-		filters: dict[str, FilterValue] | FilterValue | list[list | FilterValue] | None = None,
+		fields: list | tuple | None = None,
+		filters: dict[str, str | int] | str | int | list[list | str | int] | None = None,
 		order_by: str | None = None,
 		group_by: str | None = None,
 		limit: int | None = None,
@@ -113,13 +113,13 @@ class Engine:
 
 	def apply_filters(
 		self,
-		filters: dict[str, FilterValue] | FilterValue | list[list | FilterValue] | None = None,
+		filters: dict[str, str | int] | str | int | list[list | str | int] | None = None,
 	):
 		if filters is None:
 			return
 
-		if isinstance(filters, FilterValue):
-			filters = {"name": convert_to_value(filters)}
+		if isinstance(filters, str | int):
+			filters = {"name": str(filters)}
 
 		if isinstance(filters, Criterion):
 			self.query = self.query.where(filters)
@@ -128,11 +128,11 @@ class Engine:
 			self.apply_dict_filters(filters)
 
 		elif isinstance(filters, list | tuple):
-			if all(isinstance(d, FilterValue) for d in filters) and len(filters) > 0:
-				self.apply_dict_filters({"name": ("in", tuple(convert_to_value(f) for f in filters))})
+			if all(isinstance(d, str | int) for d in filters) and len(filters) > 0:
+				self.apply_dict_filters({"name": ("in", filters)})
 			else:
 				for filter in filters:
-					if isinstance(filter, FilterValue | Criterion | dict):
+					if isinstance(filter, str | int | Criterion | dict):
 						self.apply_filters(filter)
 					elif isinstance(filter, list | tuple):
 						self.apply_list_filters(filter)
@@ -148,7 +148,7 @@ class Engine:
 			doctype, field, operator, value = filter
 			self._apply_filter(field, value, operator, doctype)
 
-	def apply_dict_filters(self, filters: dict[str, FilterValue | list]):
+	def apply_dict_filters(self, filters: dict[str, str | int | list]):
 		for field, value in filters.items():
 			operator = "="
 			if isinstance(value, list | tuple):
@@ -157,11 +157,7 @@ class Engine:
 			self._apply_filter(field, value, operator)
 
 	def _apply_filter(
-		self,
-		field: str,
-		value: FilterValue | list | set | None,
-		operator: str = "=",
-		doctype: str | None = None,
+		self, field: str, value: str | int | list | None, operator: str = "=", doctype: str | None = None
 	):
 		_field = field
 		_value = value
@@ -189,9 +185,10 @@ class Engine:
 					(table.parent == self.table.name) & (table.parenttype == self.doctype)
 				)
 
-		_value = convert_to_value(_value)
+		if isinstance(_value, bool):
+			_value = int(_value)
 
-		if not _value and isinstance(_value, list | tuple | set):
+		elif not _value and isinstance(_value, list | tuple):
 			_value = ("",)
 
 		# Nested set
@@ -221,7 +218,7 @@ class Engine:
 			self.query = self.query.where(operator_fn(_field, _value))
 
 	def get_function_object(self, field: str) -> "Function":
-		"""Return PyPika Function object. Expect field to look like 'SUM(*)' or 'name' or something similar."""
+		"""Expects field to look like 'SUM(*)' or 'name' or something similar. Returns PyPika Function object"""
 		func = field.split("(", maxsplit=1)[0].capitalize()
 		args_start, args_end = len(func) + 1, field.index(")")
 		args = field[args_start:args_end].split(",")

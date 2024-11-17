@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 
@@ -35,8 +35,8 @@ class DocumentNamingSettings(Document):
 		transaction_type: DF.Autocomplete | None
 		try_naming_series: DF.Data | None
 		user_must_always_select: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	@frappe.whitelist()
 	def get_transactions_and_prefixes(self):
 		transactions = self._get_transactions()

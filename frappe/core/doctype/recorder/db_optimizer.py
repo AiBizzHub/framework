@@ -30,7 +30,7 @@ class DBColumn:
 
 	@classmethod
 	def from_frappe_ouput(cls, data) -> "DBColumn":
-		"Parse DBColumn from output of describe-database-table command in AiBizzApp"
+		"Parse DBColumn from output of describe-database-table command in Frappe"
 		return cls(
 			name=data["column"],
 			cardinality=data.get("cardinality"),
@@ -59,7 +59,7 @@ class DBIndex:
 
 	@classmethod
 	def from_frappe_ouput(cls, data, table) -> "DBIndex":
-		"Parse DBIndex from output of describe-database-table command in AiBizzApp"
+		"Parse DBIndex from output of describe-database-table command in Frappe"
 		return cls(
 			name=data["name"],
 			table=table,
@@ -118,7 +118,7 @@ class DBTable:
 
 	@classmethod
 	def from_frappe_ouput(cls, data) -> "DBTable":
-		"Parse DBTable from output of describe-database-table command in AiBizzApp"
+		"Parse DBTable from output of describe-database-table command in Frappe"
 		table_name = data["table_name"]
 		return cls(
 			name=table_name,

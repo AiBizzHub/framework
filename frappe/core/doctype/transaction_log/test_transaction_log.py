@@ -1,21 +1,14 @@
-# Copyright (c) 2018, AiBizzApp Technologies and Contributors
+# Copyright (c) 2018, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import hashlib
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+test_records = []
 
 
-class UnitTestTransactionLog(UnitTestCase):
-	"""
-	Unit tests for TransactionLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestTransactionLog(IntegrationTestCase):
+class TestTransactionLog(FrappeTestCase):
 	def test_validate_chaining(self):
 		frappe.get_doc(
 			{

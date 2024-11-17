@@ -15,8 +15,8 @@ from werkzeug.test import TestResponse
 
 import frappe
 from frappe.installer import update_site_config
-from frappe.tests import IntegrationTestCase
-from frappe.utils import cint, get_test_client, get_url
+from frappe.tests.utils import FrappeTestCase, patch_hooks
+from frappe.utils import cint, get_site_url, get_test_client, get_url
 
 try:
 	_site = frappe.local.site
@@ -84,7 +84,7 @@ resource_key = {
 }
 
 
-class AiBizzAppAPITestCase(IntegrationTestCase):
+class FrappeAPITestCase(FrappeTestCase):
 	version = ""  # Empty implies v1
 	TEST_CLIENT = get_test_client()
 
@@ -131,9 +131,9 @@ class AiBizzAppAPITestCase(IntegrationTestCase):
 		return make_request(target=self.TEST_CLIENT.delete, args=(path,), kwargs=kwargs)
 
 
-class TestResourceAPI(AiBizzAppAPITestCase):
+class TestResourceAPI(FrappeAPITestCase):
 	DOCTYPE = "ToDo"
-	GENERATED_DOCUMENTS: typing.ClassVar[list] = []
+	GENERATED_DOCUMENTS: typing.ClassVar = []
 
 	@classmethod
 	def setUpClass(cls):
@@ -250,7 +250,7 @@ class TestResourceAPI(AiBizzAppAPITestCase):
 			self.assertIsInstance(data[0], dict)
 
 
-class TestMethodAPI(AiBizzAppAPITestCase):
+class TestMethodAPI(FrappeAPITestCase):
 	def test_ping(self):
 		# test 2: test for /api/method/ping
 		response = self.get(self.method("ping"))
@@ -331,7 +331,7 @@ class TestMethodAPI(AiBizzAppAPITestCase):
 		self.assertEqual(response.json["message"], test_data)
 
 
-class TestReadOnlyMode(AiBizzAppAPITestCase):
+class TestReadOnlyMode(FrappeAPITestCase):
 	"""During migration if read only mode can be enabled.
 	Test if reads work well and writes are blocked"""
 
@@ -358,11 +358,11 @@ class TestReadOnlyMode(AiBizzAppAPITestCase):
 		self.assertEqual(response.json["exc_type"], "InReadOnlyMode")
 
 
-class TestWSGIApp(AiBizzAppAPITestCase):
+class TestWSGIApp(FrappeAPITestCase):
 	def test_request_hooks(self):
 		self.addCleanup(lambda: _test_REQ_HOOK.clear())
 
-		with self.patch_hooks(
+		with patch_hooks(
 			{
 				"before_request": ["frappe.tests.test_api.before_request"],
 				"after_request": ["frappe.tests.test_api.after_request"],
@@ -386,7 +386,7 @@ def after_request(*args, **kwargs):
 	_test_REQ_HOOK["after_request"] = time()
 
 
-class TestResponse(AiBizzAppAPITestCase):
+class TestResponse(FrappeAPITestCase):
 	def test_generate_pdf(self):
 		response = self.get(
 			"/api/method/frappe.utils.print_format.download_pdf",

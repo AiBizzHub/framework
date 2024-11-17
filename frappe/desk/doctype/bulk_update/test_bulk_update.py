@@ -1,4 +1,4 @@
-# Copyright (c) 2023, AiBizzApp Technologies and Contributors
+# Copyright (c) 2023, AiBizzHub, LLC and Contributors
 # See LICENSE
 
 import time
@@ -6,19 +6,10 @@ import time
 import frappe
 from frappe.core.doctype.doctype.test_doctype import new_doctype
 from frappe.desk.doctype.bulk_update.bulk_update import submit_cancel_or_update_docs
-from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
+from frappe.tests.utils import FrappeTestCase, timeout
 
 
-class UnitTestBulkUpdate(UnitTestCase):
-	"""
-	Unit tests for BulkUpdate.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestBulkUpdate(IntegrationTestCase):
+class TestBulkUpdate(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls) -> None:
 		super().setUpClass()

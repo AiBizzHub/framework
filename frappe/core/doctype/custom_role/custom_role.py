@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -19,16 +19,11 @@ class CustomRole(Document):
 		ref_doctype: DF.Data | None
 		report: DF.Link | None
 		roles: DF.Table[HasRole]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if self.report and not self.ref_doctype:
 			self.ref_doctype = frappe.db.get_value("Report", self.report, "ref_doctype")
-
-	def get_permission_log_options(self, event=None):
-		if self.report:
-			return {"for_doctype": "Report", "for_document": self.report, "fields": ["roles"]}
-		return {"for_doctype": "Page", "for_document": self.page, "fields": ["roles"]}
 
 
 def get_custom_allowed_roles(field, name):

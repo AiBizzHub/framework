@@ -1,10 +1,10 @@
 # Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestDynamicLinks(IntegrationTestCase):
+class TestDynamicLinks(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Email Unsubscribe")
 

@@ -1,20 +1,11 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
 from frappe import _
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestTranslation(UnitTestCase):
-	"""
-	Unit tests for Translation.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestTranslation(IntegrationTestCase):
+class TestTranslation(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Translation")
 
@@ -36,33 +27,28 @@ class TestTranslation(IntegrationTestCase):
 			self.assertEqual(_(val[0]), val[0])
 
 	def test_parent_language(self):
-		data = {
-			"Test Data": {
-				"es": "datos de prueba",
-				"es-MX": "pruebas de datos",
-			},
-			"Test Spanish": {
-				"es": "prueba de español",
-			},
-		}
+		data = [
+			["es", ["Test Data", "datos de prueba"]],
+			["es", ["Test Spanish", "prueba de español"]],
+			["es-MX", ["Test Data", "pruebas de datos"]],
+		]
 
-		for ss, lm in data.items():
-			for l, st in lm.items():
-				create_translation(l, (ss, st))
+		for key, val in data:
+			create_translation(key, val)
 
 		frappe.local.lang = "es"
 
-		self.assertEqual(_("Test Data"), data["Test Data"]["es"])
+		self.assertTrue(_(data[0][0]), data[0][1])
 
-		self.assertEqual(_("Test Spanish"), data["Test Spanish"]["es"])
+		self.assertTrue(_(data[1][0]), data[1][1])
 
 		frappe.local.lang = "es-MX"
 
 		# different translation for es-MX
-		self.assertEqual(_("Test Data"), data["Test Data"]["es-MX"])
+		self.assertTrue(_(data[2][0]), data[2][1])
 
 		# from spanish (general)
-		self.assertEqual(_("Test Spanish"), data["Test Spanish"]["es"])
+		self.assertTrue(_(data[1][0]), data[1][1])
 
 	def test_multi_language_translations(self):
 		source = "User"

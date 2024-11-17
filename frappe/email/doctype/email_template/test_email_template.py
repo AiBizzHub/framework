@@ -1,16 +1,7 @@
-# Copyright (c) 2018, AiBizzApp Technologies and Contributors
+# Copyright (c) 2018, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestEmailTemplate(UnitTestCase):
-	"""
-	Unit tests for EmailTemplate.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestEmailTemplate(IntegrationTestCase):
+class TestEmailTemplate(FrappeTestCase):
 	pass

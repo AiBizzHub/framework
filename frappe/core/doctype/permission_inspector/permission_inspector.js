@@ -1,4 +1,4 @@
-// Copyright (c) 2024, AiBizzApp Technologies and contributors
+// Copyright (c) 2024, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 const call_debug = (frm) => {

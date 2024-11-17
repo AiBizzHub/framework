@@ -1,16 +1,9 @@
 # Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Client Script')
 
 
-class UnitTestClientScript(UnitTestCase):
-	"""
-	Unit tests for ClientScript.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestClientScript(IntegrationTestCase):
+class TestClientScript(FrappeTestCase):
 	pass

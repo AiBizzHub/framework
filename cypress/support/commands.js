@@ -37,16 +37,22 @@ Cypress.Commands.add("login", (email, password) => {
 	// cy.session clears all localStorage on new login, so we need to retain the last route
 	const session_last_route = window.localStorage.getItem("session_last_route");
 	return cy
-		.session([email, password] || "", () => {
-			return cy.request({
-				url: "/api/method/login",
-				method: "POST",
-				body: {
-					usr: email,
-					pwd: password,
-				},
-			});
-		})
+		.session(
+			[email, password] || "",
+			() => {
+				return cy.request({
+					url: "/api/method/login",
+					method: "POST",
+					body: {
+						usr: email,
+						pwd: password,
+					},
+				});
+			},
+			{
+				cacheAcrossSpecs: true,
+			}
+		)
 		.then(() => {
 			if (session_last_route) {
 				window.localStorage.setItem("session_last_route", session_last_route);
@@ -67,7 +73,7 @@ Cypress.Commands.add("call", (method, args) => {
 					headers: {
 						Accept: "application/json",
 						"Content-Type": "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 				})
 				.then((res) => {
@@ -94,7 +100,7 @@ Cypress.Commands.add("get_list", (doctype, fields = [], filters = []) => {
 					url,
 					headers: {
 						Accept: "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 				})
 				.then((res) => {
@@ -115,7 +121,7 @@ Cypress.Commands.add("get_doc", (doctype, name) => {
 					url: `/api/resource/${doctype}/${name}`,
 					headers: {
 						Accept: "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 				})
 				.then((res) => {
@@ -136,7 +142,7 @@ Cypress.Commands.add("remove_doc", (doctype, name) => {
 					url: `/api/resource/${doctype}/${name}`,
 					headers: {
 						Accept: "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 				})
 				.then((res) => {
@@ -340,7 +346,7 @@ Cypress.Commands.add("insert_doc", (doctype, args, ignore_duplicate) => {
 					headers: {
 						Accept: "application/json",
 						"Content-Type": "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 					failOnStatusCode: !ignore_duplicate,
 				})
@@ -377,7 +383,7 @@ Cypress.Commands.add("update_doc", (doctype, docname, args) => {
 					headers: {
 						Accept: "application/json",
 						"Content-Type": "application/json",
-						"X-AiBizzApp-CSRF-Token": csrf_token,
+						"X-Frappe-CSRF-Token": csrf_token,
 					},
 				})
 				.then((res) => {

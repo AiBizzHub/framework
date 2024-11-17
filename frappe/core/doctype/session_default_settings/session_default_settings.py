@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -20,7 +20,6 @@ class SessionDefaultSettings(Document):
 
 		session_defaults: DF.Table[SessionDefault]
 	# end: auto-generated types
-
 	pass
 
 

@@ -40,7 +40,7 @@ export default {
 			cancel: 1,
 		},
 	],
-	sort_field: "creation",
+	sort_field: "modified",
 	sort_order: "ASC",
 	track_changes: 1,
 };

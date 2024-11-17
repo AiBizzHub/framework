@@ -24,5 +24,4 @@ class WebsiteSlideshowItem(Document):
 		parenttype: DF.Data
 		url: DF.Data | None
 	# end: auto-generated types
-
 	pass

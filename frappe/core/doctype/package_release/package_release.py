@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import os
@@ -26,8 +26,8 @@ class PackageRelease(Document):
 		path: DF.SmallText | None
 		publish: DF.Check
 		release_notes: DF.MarkdownEditor | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def set_version(self):
 		# set the next patch release by default
 		doctype = frappe.qb.DocType("Package Release")
@@ -116,10 +116,12 @@ class PackageRelease(Document):
 
 		# make attachment
 		file = frappe.get_doc(
-			doctype="File",
-			file_url="/" + os.path.join("files", filename),
-			attached_to_doctype=self.doctype,
-			attached_to_name=self.name,
+			dict(
+				doctype="File",
+				file_url="/" + os.path.join("files", filename),
+				attached_to_doctype=self.doctype,
+				attached_to_name=self.name,
+			)
 		)
 
 		# Set path to tarball

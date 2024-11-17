@@ -104,7 +104,7 @@ def fetch_assets(url, frappe_head):
 	if not assets_archive:
 		raise AssetsNotDownloadedError(f"Assets could not be retrived from {url}")
 
-	click.echo(click.style("✔", fg="green") + f" Downloaded AiBizzApp assets from {url}")
+	click.echo(click.style("✔", fg="green") + f" Downloaded Frappe assets from {url}")
 
 	return assets_archive
 
@@ -133,9 +133,10 @@ def setup_assets(assets_archive):
 	return directories_created
 
 
-def download_frappe_assets(verbose=True) -> bool:
-	"""Download and set up AiBizzApp assets if they exist based on the current commit HEAD.
-	Return True if correctly setup else return False.
+def download_frappe_assets(verbose=True):
+	"""Downloads and sets up Frappe assets if they exist based on the current
+	commit HEAD.
+	Returns True if correctly setup else returns False.
 	"""
 	frappe_head = getoutput("cd ../apps/frappe && git rev-parse HEAD")
 
@@ -226,7 +227,6 @@ def bundle(
 	skip_frappe=False,
 	files=None,
 	save_metafiles=False,
-	using_cached=False,
 ):
 	"""concat / minify js files"""
 	setup()
@@ -244,10 +244,7 @@ def bundle(
 	if files:
 		command += " --files {files}".format(files=",".join(files))
 
-	if using_cached:
-		command += " --using-cached"
-	else:
-		command += " --run-build-command"
+	command += " --run-build-command"
 
 	if save_metafiles:
 		command += " --save-metafiles"
@@ -405,7 +402,7 @@ def link_assets_dir(source, target, hard_link=False):
 
 
 def scrub_html_template(content):
-	"""Return HTML content with removed whitespace and comments."""
+	"""Returns HTML content with removed whitespace and comments"""
 	# remove whitespace to a single space
 	content = WHITESPACE_PATTERN.sub(" ", content)
 
@@ -416,7 +413,7 @@ def scrub_html_template(content):
 
 
 def html_to_js_template(path, content):
-	"""Return HTML template content as Javascript code, by adding it to `frappe.templates`."""
+	"""returns HTML template content as Javascript code, adding it to `frappe.templates`"""
 	return """frappe.templates["{key}"] = '{content}';\n""".format(
 		key=path.rsplit("/", 1)[-1][:-5], content=scrub_html_template(content)
 	)

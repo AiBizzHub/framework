@@ -2,6 +2,7 @@
 # License: MIT. See LICENSE
 
 import functools
+import hashlib
 import io
 import os
 import shutil
@@ -23,10 +24,9 @@ from typing import TypedDict
 
 from werkzeug.test import Client
 
-from frappe.deprecation_dumpster import gzip_compress, gzip_decompress, make_esc
-
 # utility functions like cint, int, flt, etc.
 from frappe.utils.data import *
+from frappe.utils.deprecations import deprecated
 from frappe.utils.html_utils import sanitize_html
 
 EMAIL_NAME_PATTERN = re.compile(r"[^A-Za-z0-9\u00C0-\u024F\/\_\' ]+")
@@ -42,17 +42,6 @@ EMAIL_MATCH_PATTERN = re.compile(
 	r"[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
 	re.IGNORECASE,
 )
-
-UNSET = object()
-
-
-if sys.version_info < (3, 11):
-
-	def exception():
-		_exc_type, exc_value, _exc_traceback = sys.exc_info()
-		return exc_value
-
-	sys.exception = exception
 
 
 def get_fullname(user=None):
@@ -135,7 +124,7 @@ def validate_phone_number_with_country_code(phone_number: str, fieldname: str) -
 
 
 def validate_phone_number(phone_number, throw=False):
-	"""Return True if valid phone number."""
+	"""Returns True if valid phone number"""
 	if not phone_number:
 		return False
 
@@ -151,12 +140,11 @@ def validate_phone_number(phone_number, throw=False):
 
 
 def validate_name(name, throw=False):
-	"""Return True if the name is valid
+	"""Returns True if the name is valid
+	valid names may have unicode and ascii characters, dash, quotes, numbers
+	anything else is considered invalid
 
-	* valid names may have unicode and ascii characters, dash, quotes, numbers
-	* anything else is considered invalid
-
-	Note: "Name" here is name of a person, not the primary key in AiBizzApp doctypes.
+	Note: "Name" here is name of a person, not the primary key in Frappe doctypes.
 	"""
 	if not name:
 		return False
@@ -206,8 +194,6 @@ def validate_email_address(email_str, throw=False):
 
 	out = []
 	for e in email_str.split(","):
-		if not e:
-			continue
 		email = _check(e.strip())
 		if email:
 			out.append(email)
@@ -234,11 +220,14 @@ def validate_url(
 	valid_schemes: str | Container[str] | None = None,
 ) -> bool:
 	"""
-	Return True if `txt` represents a valid URL.
+	Checks whether `txt` has a valid URL string
 
-	Args:
-	        throw: throws a validationError if URL is not valid
-	        valid_schemes: if provided checks the given URL's scheme against this
+	Parameters:
+	        throw (`bool`): throws a validationError if URL is not valid
+	        valid_schemes (`str` or `list`): if provided checks the given URL's scheme against this
+
+	Returns:
+	        bool: if `txt` represents a valid URL
 	"""
 	url = urlparse(txt)
 	is_valid = bool(url.netloc) or (txt and txt.startswith("/"))
@@ -264,7 +253,7 @@ def random_string(length: int) -> str:
 
 
 def has_gravatar(email: str) -> str:
-	"""Return gravatar url if user has set an avatar at gravatar.com."""
+	"""Returns gravatar url if user has set an avatar at gravatar.com"""
 	import requests
 
 	if frappe.flags.in_import or frappe.flags.in_install or frappe.flags.in_test:
@@ -284,40 +273,32 @@ def has_gravatar(email: str) -> str:
 
 
 def get_gravatar_url(email: str, default: Literal["mm", "404"] = "mm") -> str:
-	"""Return gravatar URL for the given email.
-
-	If `default` is set to "404", gravatar URL will return 404 if no avatar is found.
-	If `default` is set to "mm", a placeholder image will be returned.
-	"""
 	hexdigest = hashlib.md5(frappe.as_unicode(email).encode("utf-8"), usedforsecurity=False).hexdigest()
 	return f"https://secure.gravatar.com/avatar/{hexdigest}?d={default}&s=200"
 
 
 def get_gravatar(email: str) -> str:
-	"""Return gravatar URL if user has set an avatar at gravatar.com.
-
-	Else return identicon image (base64)."""
 	from frappe.utils.identicon import Identicon
 
 	return has_gravatar(email) or Identicon(email).base64()
 
 
 def get_traceback(with_context=False) -> str:
-	"""Return the traceback of the Exception."""
+	"""
+	Returns the traceback of the Exception
+	"""
 	from traceback_with_variables import iter_exc_lines
 
-	exc = sys.exception()
-	if not exc:
+	exc_type, exc_value, exc_tb = sys.exc_info()
+
+	if not any([exc_type, exc_value, exc_tb]):
 		return ""
 
-	if exc.__cause__:
-		exc = exc.__cause__
-
 	if with_context:
-		trace_list = iter_exc_lines(exc, fmt=_get_traceback_sanitizer())
+		trace_list = iter_exc_lines(fmt=_get_traceback_sanitizer())
 		tb = "\n".join(trace_list)
 	else:
-		trace_list = traceback.format_exception(exc)
+		trace_list = traceback.format_exception(exc_type, exc_value, exc_tb)
 		tb = "".join(cstr(t) for t in trace_list)
 
 	bench_path = get_bench_path() + "/"
@@ -368,7 +349,9 @@ def log(event, details):
 
 
 def dict_to_str(args: dict[str, Any], sep: str = "&") -> str:
-	"""Convert a dictionary to URL."""
+	"""
+	Converts a dictionary to URL
+	"""
 	return sep.join(f"{k!s}=" + quote(str(args[k] or "")) for k in list(args))
 
 
@@ -399,20 +382,24 @@ def set_default(key, val):
 
 
 def remove_blanks(d: dict) -> dict:
-	"""Return d with empty ('' or None) values stripped. Mutates inplace."""
+	"""
+	Returns d with empty ('' or None) values stripped. Mutates inplace.
+	"""
 	for k, v in tuple(d.items()):
 		if not v:
 			del d[k]
 	return d
 
 
-def strip_html_tags(text: str) -> str:
-	"""Remove html tags from the given `text`."""
+def strip_html_tags(text):
+	"""Remove html tags from text"""
 	return HTML_TAGS_PATTERN.sub("", text)
 
 
 def get_file_timestamp(fn):
-	"""Return timestamp of the given file."""
+	"""
+	Returns timestamp of the given file
+	"""
 	from frappe.utils import cint
 
 	try:
@@ -422,6 +409,14 @@ def get_file_timestamp(fn):
 			raise
 		else:
 			return None
+
+
+# to be deprecated
+def make_esc(esc_chars):
+	"""
+	Function generator for Escaping special characters
+	"""
+	return lambda s: "".join("\\" + c if c in esc_chars else c for c in s)
 
 
 # esc / unescape characters -- used for command line
@@ -577,7 +572,7 @@ def touch_file(path):
 
 
 def get_test_client(use_cookies=True) -> Client:
-	"""Return an test instance of the AiBizzApp WSGI."""
+	"""Returns an test instance of the Frappe WSGI"""
 	from frappe.app import application
 
 	return Client(application, use_cookies=use_cookies)
@@ -601,7 +596,7 @@ def call_hook_method(hook, *args, **kwargs):
 
 
 def is_cli() -> bool:
-	"""Return True if current instance is being run via a terminal."""
+	"""Returns True if current instance is being run via a terminal"""
 	invoked_from_terminal = False
 	try:
 		invoked_from_terminal = bool(os.get_terminal_size())
@@ -846,12 +841,11 @@ def parse_json(val):
 
 def get_db_count(*args):
 	"""
-	Pass a doctype or a series of doctypes to get the count of docs in them.
-
+	Pass a doctype or a series of doctypes to get the count of docs in them
 	Parameters:
 	        *args: Variable length argument list of doctype names whose doc count you need
 
-	Return:
+	Returns:
 	        dict: A dict with the count values.
 
 	Example:
@@ -871,7 +865,7 @@ def call(fn, *args, **kwargs):
 	Parameters:
 	        fn: frappe function to be called
 
-	Return:
+	Returns:
 	        based on the function you call: output of the function you call
 
 	Example:
@@ -879,6 +873,34 @@ def call(fn, *args, **kwargs):
 	                bench --site erpnext.local execute frappe.utils.call --args '''["frappe.get_all", "Activity Log"]''' --kwargs '''{"fields": ["user", "creation", "full_name"], "filters":{"Operation": "Login", "Status": "Success"}, "limit": "10"}'''
 	"""
 	return json.loads(frappe.as_json(frappe.call(fn, *args, **kwargs)))
+
+
+# Following methods are aken as-is from Python 3 codebase
+# since gzip.compress and gzip.decompress are not available in Python 2.7
+
+
+@deprecated
+def gzip_compress(data, compresslevel=9):
+	"""Compress data in one shot and return the compressed string.
+	Optional argument is the compression level, in range of 0-9.
+	"""
+	from gzip import GzipFile
+
+	buf = io.BytesIO()
+	with GzipFile(fileobj=buf, mode="wb", compresslevel=compresslevel) as f:
+		f.write(data)
+	return buf.getvalue()
+
+
+@deprecated
+def gzip_decompress(data):
+	"""Decompress a gzip compressed string in one shot.
+	Return the decompressed string.
+	"""
+	from gzip import GzipFile
+
+	with GzipFile(fileobj=io.BytesIO(data)) as f:
+		return f.read()
 
 
 def get_safe_filters(filters):
@@ -896,7 +918,7 @@ def get_safe_filters(filters):
 
 
 def create_batch(iterable: Iterable, size: int) -> Generator[Iterable, None, None]:
-	"""Convert an iterable to multiple batches of constant size of batch_size.
+	"""Convert an iterable to multiple batches of constant size of batch_size
 
 	Args:
 	        iterable (Iterable): Iterable object which is subscriptable
@@ -976,12 +998,12 @@ def get_assets_json():
 
 
 def get_bench_relative_path(file_path):
-	"""Fix paths relative to the bench root directory if exists and return the absolute path.
+	"""Fixes paths relative to the bench root directory if exists and returns the absolute path
 
 	Args:
 	        file_path (str, Path): Path of a file that exists on the file system
 
-	Return:
+	Returns:
 	        str: Absolute path of the file_path
 	"""
 	if not os.path.exists(file_path):

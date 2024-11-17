@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import datetime
@@ -31,8 +31,8 @@ class TokenCache(Document):
 		success_uri: DF.Data | None
 		token_type: DF.Data | None
 		user: DF.Link | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def get_auth_header(self):
 		if self.access_token:
 			return {"Authorization": "Bearer " + self.get_password("access_token")}

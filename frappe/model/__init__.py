@@ -3,7 +3,7 @@
 
 # model __init__.py
 import frappe
-from frappe import _, _lt
+from frappe import _
 
 data_fieldtypes = (
 	"Currency",

@@ -13,14 +13,15 @@ frappe.tags.utils = {
 			return [];
 		}
 
-		frappe.tags.tags.forEach((tag) => {
-			const search_result = frappe.search.utils.fuzzy_search(txt, tag, true);
-			if (search_result.score) {
+		for (let i in frappe.tags.tags) {
+			let tag = frappe.tags.tags[i];
+			let level = frappe.search.utils.fuzzy_search(txt, tag);
+			if (level) {
 				out.push({
 					type: "Tag",
-					label: __("#{0}", [search_result.marked_string]),
+					label: __("#{0}", [frappe.search.utils.bolden_match_part(__(tag), txt)]),
 					value: __("#{0}", [__(tag)]),
-					index: 1 + search_result.score,
+					index: 1 + level,
 					match: tag,
 					onclick() {
 						// Use Global Search Dialog for tag search too.
@@ -28,7 +29,8 @@ frappe.tags.utils = {
 					},
 				});
 			}
-		});
+		}
+
 		return out;
 	},
 

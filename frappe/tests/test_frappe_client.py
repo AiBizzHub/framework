@@ -7,17 +7,17 @@ import requests
 
 import frappe
 from frappe.core.doctype.user.user import generate_keys
-from frappe.frappeclient import AiBizzAppClient, AiBizzAppException
+from frappe.frappeclient import FrappeClient, FrappeException
 from frappe.model import default_fields
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.data import get_url
 
 
-class TestAiBizzAppClient(IntegrationTestCase):
+class TestFrappeClient(FrappeTestCase):
 	PASSWORD = frappe.conf.admin_password or "admin"
 
 	def test_insert_many(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		server.insert_many(
 			[
 				{"doctype": "Note", "title": "Sing"},
@@ -37,7 +37,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		self.assertIn("sixpence", records)
 
 	def test_create_doc(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		response = server.insert({"doctype": "Note", "title": "test_create"})
 
 		for field in default_fields:
@@ -47,7 +47,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		self.assertEqual(response.get("title"), "test_create")
 
 	def test_list_docs(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		doc_list = server.get_list("Note")
 
 		self.assertTrue(len(doc_list))
@@ -56,7 +56,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		USER = "Administrator"
 		TITLE = "get_this"
 		DOCTYPE = "Note"
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 
 		NAME = server.insert({"doctype": DOCTYPE, "title": TITLE}).get("name")
 		doc = server.get_doc(DOCTYPE, NAME)
@@ -71,24 +71,24 @@ class TestAiBizzAppClient(IntegrationTestCase):
 
 	def test_get_value_by_filters(self):
 		CONTENT = "test get value"
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		server.insert({"doctype": "Note", "title": "get_value", "content": CONTENT}).get("name")
 
 		self.assertEqual(server.get_value("Note", "content", {"title": "get_value"}).get("content"), CONTENT)
 
 	def test_get_value_by_name(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		CONTENT = "test get value"
 		NAME = server.insert({"doctype": "Note", "title": "get_value", "content": CONTENT}).get("name")
 
 		self.assertEqual(server.get_value("Note", "content", NAME).get("content"), CONTENT)
 
 	def test_get_value_with_malicious_query(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		server.insert({"doctype": "Note", "title": "get_value"})
 
 		self.assertRaises(
-			AiBizzAppException,
+			FrappeException,
 			server.get_value,
 			"Note",
 			"(select (password) from(__Auth) order by name desc limit 1)",
@@ -96,7 +96,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		)
 
 	def test_get_single(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		server.set_value("Website Settings", "Website Settings", "title_prefix", "test-prefix")
 		self.assertEqual(
 			server.get_value("Website Settings", "title_prefix", "Website Settings").get("title_prefix"),
@@ -108,7 +108,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		frappe.db.set_single_value("Website Settings", "title_prefix", "")
 
 	def test_update_doc(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		resp = server.insert({"doctype": "Note", "title": "Sing"})
 		doc = server.get_doc("Note", resp.get("name"))
 
@@ -118,7 +118,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		self.assertTrue(doc["content"] == CONTENT)
 
 	def test_update_child_doc(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		frappe.db.delete("Contact", {"first_name": "George", "last_name": "Steevens"})
 		frappe.db.delete("Contact", {"first_name": "William", "last_name": "Shakespeare"})
 		frappe.db.delete("Communication", {"reference_doctype": "Event"})
@@ -160,7 +160,7 @@ class TestAiBizzAppClient(IntegrationTestCase):
 		self.assertTrue(frappe.db.exists("Communication Link", {"link_name": "William Shakespeare"}))
 
 	def test_delete_doc(self):
-		server = AiBizzAppClient(get_url(), "Administrator", self.PASSWORD, verify=False)
+		server = FrappeClient(get_url(), "Administrator", self.PASSWORD, verify=False)
 		NAME_TO_DELETE = server.insert({"doctype": "Note", "title": "Sing"}).get("name")
 		server.delete("Note", NAME_TO_DELETE)
 		self.assertFalse(frappe.db.get_value("Note", NAME_TO_DELETE))

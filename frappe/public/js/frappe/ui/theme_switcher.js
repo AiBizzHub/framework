@@ -56,7 +56,7 @@ frappe.ui.ThemeSwitcher = class ThemeSwitcher {
 			this.themes = [
 				{
 					name: "light",
-					label: __("AiBizzApp Light"),
+					label: __("Eternal Dawn"),
 					info: __("Light Theme"),
 				},
 				{

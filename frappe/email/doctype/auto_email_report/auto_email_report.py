@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import calendar
@@ -98,7 +98,7 @@ class AutoEmailReport(Document):
 
 		max_reports_per_user = (
 			cint(frappe.local.conf.max_reports_per_user)  # kept for backward compatibilty
-			or cint(frappe.get_system_settings("max_auto_email_report_per_user"))
+			or cint(frappe.db.get_single_value("System Settings", "max_auto_email_report_per_user"))
 			or 20
 		)
 
@@ -134,7 +134,7 @@ class AutoEmailReport(Document):
 			)
 
 	def get_report_content(self):
-		"""Return file for the report in given format."""
+		"""Returns file in for the report in given format"""
 		report = frappe.get_doc("Report", self.report)
 
 		self.filters = frappe.parse_json(self.filters) if self.filters else {}
@@ -260,7 +260,7 @@ class AutoEmailReport(Document):
 		else:
 			message = self.get_html_table()
 
-		if self.format != "HTML":
+		if not self.format == "HTML":
 			attachments = [{"fname": self.get_file_name(), "fcontent": data}]
 
 		frappe.sendmail(

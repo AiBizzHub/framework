@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import ssl
@@ -63,8 +63,8 @@ class LDAPSettings(Document):
 		password: DF.Password
 		require_trusted_certificate: DF.Literal["No", "Yes"]
 		ssl_tls_mode: DF.Literal["Off", "StartTLS"]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.default_user_type = self.default_user_type or "Website User"
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -17,8 +17,8 @@ class GlobalSearchSettings(Document):
 		from frappe.types import DF
 
 		allowed_in_global_search: DF.Table[GlobalSearchDocType]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		dts, core_dts, repeated_dts = [], [], []
 

@@ -86,7 +86,6 @@ frappe.views.TreeView = class TreeView {
 		var me = this;
 		if (!this.opts || !this.opts.do_not_make_page) {
 			this.parent = frappe.container.add_page(this.page_name);
-			$(this.parent).addClass("treeview");
 			frappe.ui.make_app_page({ parent: this.parent, single_column: true });
 			this.page = this.parent.page;
 			frappe.container.change_to(this.page_name);
@@ -105,17 +104,6 @@ frappe.views.TreeView = class TreeView {
 		} else {
 			this.page = this.opts.page;
 			$(this.page[0]).addClass("frappe-card");
-		}
-
-		if (frappe.meta.has_field(me.doctype, "disabled")) {
-			$(
-				"<div class='checkbox'><label><input type='checkbox'> Include Disabled </label></div>"
-			).appendTo(this.page.inner_toolbar);
-			this.page.inner_toolbar
-				.addClass("flex align-center")
-				.on("click", "input[type='checkbox']", function () {
-					me.rebuild_tree();
-				});
 		}
 
 		if (this.opts.show_expand_all) {
@@ -181,8 +169,13 @@ frappe.views.TreeView = class TreeView {
 			args: me.args,
 			callback: function (r) {
 				if (r.message) {
-					me.root_label = me.doctype;
-					me.root_value = "";
+					if (r.message.length > 1) {
+						me.root_label = me.doctype;
+						me.root_value = "";
+					} else {
+						me.root_label = r.message[0]["value"];
+						me.root_value = me.root_label;
+					}
 					me.make_tree();
 				}
 			},
@@ -196,13 +189,6 @@ frappe.views.TreeView = class TreeView {
 		if (use_value == null) {
 			use_value = use_label;
 		}
-
-		if (this.page?.inner_toolbar) {
-			this.args["include_disabled"] = this.page.inner_toolbar
-				.find("input[type='checkbox']")
-				.prop("checked");
-		}
-
 		this.tree = new frappe.ui.Tree({
 			parent: this.body,
 			label: use_label,

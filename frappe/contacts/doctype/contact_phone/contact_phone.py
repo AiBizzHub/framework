@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -21,5 +21,4 @@ class ContactPhone(Document):
 		parenttype: DF.Data
 		phone: DF.Data
 	# end: auto-generated types
-
 	pass

@@ -13,13 +13,13 @@ from frappe.desk.form.load import get_attachments
 from frappe.email.doctype.email_account.test_email_account import TestEmailAccount
 from frappe.email.doctype.email_queue.email_queue import QueueBuilder
 from frappe.query_builder.utils import db_type_is
-from frappe.tests import IntegrationTestCase
 from frappe.tests.test_query_builder import run_only_if
+from frappe.tests.utils import FrappeTestCase, change_settings
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Email Account"]
+test_dependencies = ["Email Account"]
 
 
-class TestEmail(IntegrationTestCase):
+class TestEmail(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Email Unsubscribe")
 		frappe.db.delete("Email Queue")
@@ -306,7 +306,7 @@ class TestEmail(IntegrationTestCase):
 			email_account.enable_incoming = False
 
 
-class TestVerifiedRequests(IntegrationTestCase):
+class TestVerifiedRequests(FrappeTestCase):
 	def test_round_trip(self):
 		from frappe.utils import set_request
 		from frappe.utils.verified_command import get_signed_params, verify_request
@@ -320,7 +320,7 @@ class TestVerifiedRequests(IntegrationTestCase):
 		frappe.local.request = None
 
 
-class TestEmailIntegrationTest(IntegrationTestCase):
+class TestEmailIntegrationTest(FrappeTestCase):
 	"""Sends email to local SMTP server and verifies correctness.
 
 	SMTP4Dev runs as a service in unit test CI job.
@@ -332,7 +332,7 @@ class TestEmailIntegrationTest(IntegrationTestCase):
 	SMTP4DEV_WEB = "http://localhost:3000"
 
 	def setUp(self) -> None:
-		# AiBizzApp code is configured to not attempting sending emails during test.
+		# Frappe code is configured to not attempting sending emails during test.
 		frappe.flags.testing_email = True
 		requests.delete(f"{self.SMTP4DEV_WEB}/api/Messages/*")
 		return super().setUp()
@@ -372,7 +372,7 @@ class TestEmailIntegrationTest(IntegrationTestCase):
 		self.assertSetEqual(set(recipients.split(",")), {m["to"][0] for m in sent_mails})
 
 	@run_only_if(db_type_is.MARIADB)
-	@IntegrationTestCase.change_settings("System Settings", store_attached_pdf_document=1)
+	@change_settings("System Settings", store_attached_pdf_document=1)
 	def test_store_attachments(self):
 		""" "attach print" feature just tells email queue which document to attach, this is not
 		actually stored unless system setting says so."""

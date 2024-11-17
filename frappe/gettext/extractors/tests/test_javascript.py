@@ -1,8 +1,8 @@
 from frappe.gettext.extractors.javascript import extract_javascript
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestJavaScript(IntegrationTestCase):
+class TestJavaScript(FrappeTestCase):
 	def test_extract_javascript(self):
 		code = "let test = `<p>${__('Test')}</p>`;"
 		self.assertEqual(

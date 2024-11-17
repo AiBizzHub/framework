@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -25,7 +25,7 @@ class RouteHistory(Document):
 		from frappe.query_builder.functions import Now
 
 		table = frappe.qb.DocType("Route History")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.modified < (Now() - Interval(days=days))))
 
 
 @frappe.whitelist()

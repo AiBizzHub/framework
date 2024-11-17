@@ -312,7 +312,7 @@ class EMail:
 			"Date": email.utils.formatdate(),
 			"Reply-To": self.reply_to if self.reply_to else None,
 			"CC": ", ".join(self.cc) if self.cc and self.expose_recipients == "header" else None,
-			"X-AiBizzApp-Site": get_url(),
+			"X-Frappe-Site": get_url(),
 		}
 
 		# reset headers as values may be changed.
@@ -388,7 +388,7 @@ def get_email_html(template, args, subject, header=None, with_container=False):
 
 
 def inline_style_in_html(html):
-	"""Convert email.css and html to inline-styled html."""
+	"""Convert email.css and html to inline-styled html"""
 	from premailer import Premailer
 
 	from frappe.utils.jinja_globals import bundled_asset
@@ -454,7 +454,7 @@ def add_attachment(fname, fcontent, content_type=None, parent=None, content_id=N
 
 
 def get_message_id():
-	"""Return Message ID created from doctype and name."""
+	"""Returns Message ID created from doctype and name"""
 	return email.utils.make_msgid(domain=frappe.local.site)
 
 

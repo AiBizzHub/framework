@@ -3,16 +3,13 @@
 
 import time
 import unittest
-from uuid import UUID
 
-import uuid_utils
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_full_jitter
 
 import frappe
 from frappe.core.doctype.doctype.test_doctype import new_doctype
 from frappe.model.naming import (
 	InvalidNamingSeriesError,
-	InvalidUUIDValue,
 	NamingSeries,
 	append_number_if_name_exists,
 	determine_consecutive_week_number,
@@ -22,12 +19,12 @@ from frappe.model.naming import (
 	revert_series_if_last,
 )
 from frappe.query_builder.utils import db_type_is
-from frappe.tests import IntegrationTestCase
 from frappe.tests.test_query_builder import run_only_if
+from frappe.tests.utils import FrappeTestCase, patch_hooks
 from frappe.utils import now_datetime, nowdate, nowtime
 
 
-class TestNaming(IntegrationTestCase):
+class TestNaming(FrappeTestCase):
 	def setUp(self):
 		frappe.db.delete("Note")
 
@@ -327,8 +324,8 @@ class TestNaming(IntegrationTestCase):
 
 	def test_naming_series_validation(self):
 		dns = frappe.get_doc("Document Naming Settings")
-		existing_series = dns.get_transactions_and_prefixes()["prefixes"]
-		valid = ["SINV-", "SI-.{field}.", "SI-#.###", "", *existing_series]
+		exisiting_series = dns.get_transactions_and_prefixes()["prefixes"]
+		valid = ["SINV-", "SI-.{field}.", "SI-#.###", "", *exisiting_series]
 		invalid = ["$INV-", r"WINDOWS\NAMING"]
 
 		for series in valid:
@@ -397,7 +394,7 @@ class TestNaming(IntegrationTestCase):
 		series = "TODO-.PM.-.####"
 
 		frappe.clear_cache()
-		with self.patch_hooks(
+		with patch_hooks(
 			{
 				"naming_series_variables": {
 					"PM": ["frappe.tests.test_naming.parse_naming_series_variable"],
@@ -422,27 +419,6 @@ class TestNaming(IntegrationTestCase):
 			time.sleep(0.1)
 			names.append(make_autoname("hash"))
 		self.assertEqual(names, sorted(names))
-
-	def test_uuid_naming(self):
-		uuid_doctype = new_doctype(autoname="UUID").insert().name
-		self.assertEqual("uuid", frappe.db.get_column_type(uuid_doctype, "name"))
-
-		# Auto set names
-		document = frappe.new_doc(uuid_doctype).insert()
-		uid = UUID(document.name)
-		self.assertEqual(uid.version, 7)  # Default version
-
-		# Applications can specify UUID themselves, useful for APIs to set name themselves.
-		for uid in (uuid_utils.uuid4(), uuid_utils.uuid7()):
-			doc = frappe.new_doc(uuid_doctype, name=uid).insert()
-			self.assertEqual(doc.name, str(uid))
-
-		# Can specify valid UUID strings too
-		for uid in (uuid_utils.uuid4(), uuid_utils.uuid7()):
-			doc = frappe.new_doc(uuid_doctype, name=str(uid)).insert()
-			self.assertEqual(doc.name, str(uid))
-
-		self.assertRaises(InvalidUUIDValue, frappe.new_doc(uuid_doctype, name="XYZ").insert)
 
 
 def parse_naming_series_variable(doc, variable):

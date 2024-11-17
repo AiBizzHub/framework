@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -20,7 +20,6 @@ class Milestone(Document):
 		track_field: DF.Data
 		value: DF.Data
 	# end: auto-generated types
-
 	pass
 
 

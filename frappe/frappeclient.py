@@ -1,5 +1,5 @@
 """
-AiBizzAppClient is a library that helps you connect with other frappe systems
+FrappeClient is a library that helps you connect with other frappe systems
 """
 import base64
 import json
@@ -20,11 +20,11 @@ class SiteUnreachableError(Exception):
 	pass
 
 
-class AiBizzAppException(Exception):
+class FrappeException(Exception):
 	pass
 
 
-class AiBizzAppClient:
+class FrappeClient:
 	def __init__(
 		self,
 		url,
@@ -61,7 +61,7 @@ class AiBizzAppClient:
 		self.logout()
 
 	def _login(self, username, password):
-		"""Login/start a session. Called internally on init"""
+		"""Login/start a sesion. Called internally on init"""
 		r = self.session.post(
 			self.url,
 			params={"cmd": "login", "usr": username, "pwd": password},
@@ -92,7 +92,7 @@ class AiBizzAppClient:
 			self.headers.update(auth_header)
 
 			if self.frappe_authorization_source:
-				auth_source = {"AiBizzApp-Authorization-Source": self.frappe_authorization_source}
+				auth_source = {"Frappe-Authorization-Source": self.frappe_authorization_source}
 				self.headers.update(auth_source)
 
 	def logout(self):
@@ -107,7 +107,7 @@ class AiBizzAppClient:
 		)
 
 	def get_list(self, doctype, fields='["name"]', filters=None, limit_start=0, limit_page_length=None):
-		"""Return list of records of a particular type."""
+		"""Returns list of records of a particular type"""
 		if not isinstance(fields, str):
 			fields = json.dumps(fields)
 		params = {
@@ -171,7 +171,7 @@ class AiBizzAppClient:
 		return self.post_request({"cmd": "frappe.client.submit", "doc": frappe.as_json(doc)})
 
 	def get_value(self, doctype, fieldname=None, filters=None):
-		"""Return a value from a document.
+		"""Returns a value form a document
 
 		:param doctype: DocType to be queried
 		:param fieldname: Field to be returned (default `name`)
@@ -210,7 +210,7 @@ class AiBizzAppClient:
 		return self.post_request({"cmd": "frappe.client.cancel", "doctype": doctype, "name": name})
 
 	def get_doc(self, doctype, name="", filters=None, fields=None):
-		"""Return a single remote document.
+		"""Returns a single remote document
 
 		:param doctype: DocType of the document to be returned
 		:param name: (optional) `name` of the document to be returned
@@ -371,11 +371,11 @@ class AiBizzAppClient:
 		if rjson and ("exc" in rjson) and rjson["exc"]:
 			try:
 				exc = json.loads(rjson["exc"])[0]
-				exc = "AiBizzAppClient Request Failed\n\n" + exc
+				exc = "FrappeClient Request Failed\n\n" + exc
 			except Exception:
 				exc = rjson["exc"]
 
-			raise AiBizzAppException(exc)
+			raise FrappeException(exc)
 		if "message" in rjson:
 			return rjson["message"]
 		elif "data" in rjson:
@@ -384,7 +384,7 @@ class AiBizzAppClient:
 			return None
 
 
-class AiBizzAppOAuth2Client(AiBizzAppClient):
+class FrappeOAuth2Client(FrappeClient):
 	def __init__(self, url, access_token, verify=True):
 		import requests
 

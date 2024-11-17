@@ -93,7 +93,6 @@ class DocField(Document):
 		max_height: DF.Data | None
 		no_copy: DF.Check
 		non_negative: DF.Check
-		not_nullable: DF.Check
 		oldfieldname: DF.Data | None
 		oldfieldtype: DF.Data | None
 		options: DF.SmallText | None
@@ -122,10 +121,9 @@ class DocField(Document):
 	# end: auto-generated types
 
 	def get_link_doctype(self):
-		"""Return the Link doctype for the `docfield` (if applicable).
-
-		* If fieldtype is Link: Return "options".
-		* If fieldtype is Table MultiSelect: Return "options" of the Link field in the Child Table.
+		"""Returns the Link doctype for the docfield (if applicable)
+		if fieldtype is Link: Returns "options"
+		if fieldtype is Table MultiSelect: Returns "options" of the Link field in the Child Table
 		"""
 		if self.fieldtype == "Link":
 			return self.options

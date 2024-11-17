@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import functools
@@ -76,18 +76,22 @@ class RQJob(Document):
 		return self._job_obj
 
 	@staticmethod
-	def get_list(filters=None, start=0, page_length=20, order_by="creation desc"):
-		matched_job_ids = RQJob.get_matching_job_ids(filters=filters)[start : start + page_length]
+	def get_list(args):
+		start = cint(args.get("start")) or 0
+		page_length = cint(args.get("page_length")) or 20
+
+		order_desc = "desc" in args.get("order_by", "")
+
+		matched_job_ids = RQJob.get_matching_job_ids(args)[start : start + page_length]
 
 		conn = get_redis_conn()
 		jobs = [serialize_job(job) for job in Job.fetch_many(job_ids=matched_job_ids, connection=conn) if job]
 
-		order_desc = "desc" in order_by
-		return sorted(jobs, key=lambda j: j.creation, reverse=order_desc)
+		return sorted(jobs, key=lambda j: j.modified, reverse=order_desc)
 
 	@staticmethod
-	def get_matching_job_ids(filters) -> list[str]:
-		filters = make_filter_dict(filters or [])
+	def get_matching_job_ids(args) -> list[str]:
+		filters = make_filter_dict(args.get("filters"))
 
 		queues = _eval_filters(filters.get("queue"), QUEUES)
 		statuses = _eval_filters(filters.get("status"), JOB_STATUSES)
@@ -113,12 +117,12 @@ class RQJob(Document):
 			frappe.msgprint(_("Job is not running."), title=_("Invalid Operation"))
 
 	@staticmethod
-	def get_count(filters=None) -> int:
-		return len(RQJob.get_matching_job_ids(filters))
+	def get_count(args) -> int:
+		return len(RQJob.get_matching_job_ids(args))
 
 	# None of these methods apply to virtual job doctype, overriden for sanity.
 	@staticmethod
-	def get_stats():
+	def get_stats(args):
 		return {}
 
 	def db_insert(self, *args, **kwargs):
@@ -143,12 +147,6 @@ def serialize_job(job: Job) -> frappe._dict:
 	if matches := re.match(r"<function (?P<func_name>.*) at 0x.*>", job_name):
 		job_name = matches.group("func_name")
 
-	exc_info = None
-
-	# Get exc_string from the job result if it exists
-	if job_result := job.latest_result():
-		exc_info = job_result.exc_string
-
 	return frappe._dict(
 		name=job.id,
 		job_id=job.id,
@@ -158,7 +156,7 @@ def serialize_job(job: Job) -> frappe._dict:
 		started_at=convert_utc_to_system_timezone(job.started_at) if job.started_at else "",
 		ended_at=convert_utc_to_system_timezone(job.ended_at) if job.ended_at else "",
 		time_taken=(job.ended_at - job.started_at).total_seconds() if job.ended_at else "",
-		exc_info=exc_info,
+		exc_info=job.exc_info,
 		arguments=frappe.as_json(job.kwargs),
 		timeout=job.timeout,
 		creation=convert_utc_to_system_timezone(job.created_at),

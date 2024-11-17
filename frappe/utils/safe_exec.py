@@ -7,9 +7,6 @@ import mimetypes
 import types
 from contextlib import contextmanager
 from functools import lru_cache
-from itertools import chain
-from types import FunctionType, MethodType, ModuleType
-from typing import TYPE_CHECKING, Any
 
 import RestrictedPython.Guards
 from RestrictedPython import PrintCollector, compile_restricted, safe_globals
@@ -22,15 +19,13 @@ import frappe.utils
 import frappe.utils.data
 from frappe import _
 from frappe.core.utils import html2text
-from frappe.frappeclient import AiBizzAppClient
+from frappe.frappeclient import FrappeClient
 from frappe.handler import execute_cmd
-from frappe.locale import get_date_format, get_number_format, get_time_format
 from frappe.model.delete_doc import delete_doc
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.rename_doc import rename_doc
 from frappe.modules import scrub
 from frappe.utils.background_jobs import enqueue, get_jobs
-from frappe.utils.number_format import NumberFormat
 from frappe.website.utils import get_next_link, get_toc
 from frappe.www.printview import get_visible_columns
 
@@ -59,7 +54,7 @@ class NamespaceDict(frappe._dict):
 		return ret
 
 
-class AiBizzAppTransformer(RestrictingNodeTransformer):
+class FrappeTransformer(RestrictingNodeTransformer):
 	def check_name(self, node, name, *args, **kwargs):
 		if name == "_dict":
 			return
@@ -67,7 +62,7 @@ class AiBizzAppTransformer(RestrictingNodeTransformer):
 		return super().check_name(node, name, *args, **kwargs)
 
 
-class AiBizzAppPrintCollector(PrintCollector):
+class FrappePrintCollector(PrintCollector):
 	"""Collect written text, and return it when called."""
 
 	def _call_print(self, *objects, **kwargs):
@@ -93,7 +88,7 @@ def safe_exec(
 	if not is_safe_exec_enabled():
 		msg = _("Server Scripts are disabled. Please enable server scripts from bench configuration.")
 		docs_cta = _("Read the documentation to know more")
-		msg += f"<br><a href='https://aibizzapp.com/docs/user/en/desk/scripting/server-script'>{docs_cta}</a>"
+		msg += f"<br><a href='https://frappeframework.com/docs/user/en/desk/scripting/server-script'>{docs_cta}</a>"
 		frappe.throw(msg, ServerScriptNotEnabled, title="Server Scripts Disabled")
 
 	# build globals
@@ -114,7 +109,7 @@ def safe_exec(
 	with safe_exec_flags(), patched_qb():
 		# execute script compiled by RestrictedPython
 		exec(
-			compile_restricted(script, filename=filename, policy=AiBizzAppTransformer),
+			compile_restricted(script, filename=filename, policy=FrappeTransformer),
 			exec_globals,
 			_locals,
 		)
@@ -136,7 +131,7 @@ def safe_eval(code, eval_globals=None, eval_locals=None):
 	eval_globals.update(WHITELISTED_SAFE_EVAL_GLOBALS)
 
 	return eval(
-		compile_restricted(code, filename="<safe_eval>", policy=AiBizzAppTransformer, mode="eval"),
+		compile_restricted(code, filename="<safe_eval>", policy=FrappeTransformer, mode="eval"),
 		eval_globals,
 		eval_locals,
 	)
@@ -153,7 +148,7 @@ def _validate_safe_eval_syntax(code):
 
 @contextmanager
 def safe_exec_flags():
-	if frappe.flags.in_safe_exec is None:
+	if not frappe.flags.in_safe_exec:
 		frappe.flags.in_safe_exec = 0
 
 	frappe.flags.in_safe_exec += 1
@@ -169,13 +164,11 @@ def get_safe_globals():
 	datautils = frappe._dict()
 
 	if frappe.db:
-		date_format = get_date_format()
-		time_format = get_time_format()
-		number_format = get_number_format()
+		date_format = frappe.db.get_default("date_format") or "yyyy-mm-dd"
+		time_format = frappe.db.get_default("time_format") or "HH:mm:ss"
 	else:
 		date_format = "yyyy-mm-dd"
 		time_format = "HH:mm:ss"
-		number_format = NumberFormat.from_string("#,###.##")
 
 	add_data_utils(datautils)
 
@@ -201,7 +194,6 @@ def get_safe_globals():
 			format_value=frappe.format_value,
 			date_format=date_format,
 			time_format=time_format,
-			number_format=number_format,
 			format_date=frappe.utils.data.global_date_format,
 			form_dict=form_dict,
 			bold=frappe.bold,
@@ -270,16 +262,9 @@ def get_safe_globals():
 				before_rollback=frappe.db.before_rollback,
 				add_index=frappe.db.add_index,
 			),
-			website=NamespaceDict(
-				abs_url=frappe.website.utils.abs_url,
-				extract_title=frappe.website.utils.extract_title,
-				get_boot_data=frappe.website.utils.get_boot_data,
-				get_home_page=frappe.website.utils.get_home_page,
-				get_html_content_based_on_type=frappe.website.utils.get_html_content_based_on_type,
-			),
 			lang=getattr(frappe.local, "lang", "en"),
 		),
-		AiBizzAppClient=AiBizzAppClient,
+		FrappeClient=FrappeClient,
 		style=frappe._dict(border_color="#d1d8dd"),
 		get_toc=get_toc,
 		get_next_link=get_next_link,
@@ -308,7 +293,7 @@ def get_safe_globals():
 	out._getattr_ = _getattr_for_safe_exec
 
 	# Allow using `print()` calls with `safe_exec()`
-	out._print_ = AiBizzAppPrintCollector
+	out._print_ = FrappePrintCollector
 
 	# allow iterators and list comprehension
 	out._getiter_ = iter
@@ -318,52 +303,6 @@ def get_safe_globals():
 	out.update(get_python_builtins())
 
 	return out
-
-
-def get_keys_for_autocomplete(
-	key: str,
-	value: Any,
-	prefix: str = "",
-	offset: int = 0,
-	meta: str = "ctx",
-	depth: int = 0,
-	max_depth: int | None = None,
-):
-	if max_depth and depth > max_depth:
-		return
-	full_key = f"{prefix}.{key}" if prefix else key
-	if key.startswith("_"):
-		return
-	if isinstance(value, NamespaceDict | dict) and value:
-		if key == "form_dict":
-			yield {"value": full_key, "score": offset + 7, "meta": meta}
-		else:
-			yield from chain.from_iterable(
-				get_keys_for_autocomplete(
-					key,
-					value,
-					full_key,
-					offset,
-					meta,
-					depth + 1,
-					max_depth=max_depth,
-				)
-				for key, value in value.items()
-			)
-	else:
-		if isinstance(value, type) and issubclass(value, Exception):
-			score = offset + 0
-		elif isinstance(value, ModuleType):
-			score = offset + 10
-		elif isinstance(value, FunctionType | MethodType):
-			score = offset + 9
-		elif isinstance(value, type):
-			score = offset + 8
-		elif isinstance(value, dict):
-			score = offset + 7
-		else:
-			score = offset + 6
-		yield {"value": full_key, "score": score, "meta": meta}
 
 
 def is_job_queued(job_name, queue="default"):
@@ -456,13 +395,7 @@ def get_python_builtins():
 	}
 
 
-def get_hooks(hook: str | None = None, default=None, app_name: str | None = None) -> frappe._dict:
-	"""Get hooks via `app/hooks.py`
-
-	:param hook: Name of the hook. Will gather all hooks for this name and return as a list.
-	:param default: Default if no hook found.
-	:param app_name: Filter by app."""
-
+def get_hooks(hook=None, default=None, app_name=None):
 	hooks = frappe.get_hooks(hook=hook, default=default, app_name=app_name)
 	return copy.deepcopy(hooks)
 
@@ -632,7 +565,6 @@ VALID_UTILS = (
 	"get_quarter_ending",
 	"get_first_day_of_week",
 	"get_year_start",
-	"get_year_ending",
 	"get_last_day_of_week",
 	"get_last_day",
 	"get_time",
@@ -679,9 +611,6 @@ VALID_UTILS = (
 	"comma_sep",
 	"new_line_sep",
 	"filter_strip_join",
-	"add_trackers_to_url",
-	"parse_and_map_trackers_from_url",
-	"map_trackers",
 	"get_url",
 	"get_host_name_from_request",
 	"url_contains_port",

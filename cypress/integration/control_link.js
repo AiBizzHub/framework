@@ -185,7 +185,7 @@ context("Control Link", () => {
 			cy.wait("@validate_link");
 			cy.get(".frappe-control[data-fieldname=assigned_by_full_name] .control-value").should(
 				"contain",
-				"AiBizzApp"
+				"Frappe"
 			);
 
 			cy.window().its("cur_frm.doc.assigned_by").should("eq", cy.config("testUser"));

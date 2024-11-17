@@ -4,7 +4,6 @@ from types import NoneType
 from typing import TYPE_CHECKING
 
 import frappe
-import frappe.permissions
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.model.dynamic_links import get_dynamic_link_map
@@ -31,7 +30,8 @@ def update_document_title(
 	**kwargs,
 ) -> str:
 	"""
-	Update the name or title of a document. Return `name` if document was renamed, `docname` if renaming operation was queued.
+	Update the name or title of a document. Returns `name` if document was renamed,
+	`docname` if renaming operation was queued.
 
 	:param doctype: DocType of the document
 	:param docname: Name of the document
@@ -229,15 +229,6 @@ def rename_doc(
 			indicator="green",
 		)
 
-	# let people watching the old form know that it has been renamed
-	frappe.publish_realtime(
-		event="doc_rename",
-		message={"doctype": doctype, "old": old, "new": new},
-		doctype=doctype,
-		docname=old,
-		after_commit=True,
-	)
-
 	return new
 
 
@@ -384,14 +375,14 @@ def validate_rename(
 	if not merge and exists and not ignore_if_exists:
 		frappe.throw(_("Another {0} with name {1} exists, select another name").format(doctype, new))
 
-	kwargs = {"doctype": doctype, "ptype": "write", "print_logs": False}
+	kwargs = {"doctype": doctype, "ptype": "write", "raise_exception": False}
 	if old_doc:
 		kwargs |= {"doc": old_doc}
 
 	if not (ignore_permissions or frappe.permissions.has_permission(**kwargs)):
 		frappe.throw(_("You need write permission to rename"))
 
-	if not force and not ignore_permissions and not meta.allow_rename:
+	if not (force or ignore_permissions) and not meta.allow_rename:
 		frappe.throw(_("{0} not allowed to be renamed").format(_(doctype)))
 
 	# validate naming like it's done in doc.py

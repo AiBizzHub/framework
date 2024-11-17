@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -22,8 +22,8 @@ class SystemConsole(Document):
 		output: DF.Code | None
 		show_processlist: DF.Check
 		type: DF.Literal["Python", "SQL"]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def run(self):
 		frappe.only_for("System Manager")
 		try:
@@ -42,7 +42,7 @@ class SystemConsole(Document):
 		else:
 			frappe.db.rollback()
 		frappe.get_doc(
-			doctype="Console Log", script=self.console, type=self.type, committed=self.commit
+			dict(doctype="Console Log", script=self.console, type=self.type, committed=self.commit)
 		).insert()
 		frappe.db.commit()
 
@@ -57,10 +57,7 @@ def execute_code(doc):
 @frappe.whitelist()
 def show_processlist():
 	frappe.only_for("System Manager")
-	return _show_processlist()
 
-
-def _show_processlist():
 	return frappe.db.multisql(
 		{
 			"postgres": """

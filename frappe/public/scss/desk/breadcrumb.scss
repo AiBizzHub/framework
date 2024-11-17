@@ -6,7 +6,8 @@
 }
 /*! This comment will be included even in compressed mode. */
 #navbar-breadcrumbs {
-	@include get_textstyle("sm", "regular");
+	margin-left: var(--margin-md);
+	@include get_textstyle("base", "regular");
 	a {
 		margin-right: 10px;
 		&:before {
@@ -14,11 +15,6 @@
 			display: inline-block;
 			margin-right: 10px;
 		}
-	}
-
-	li:first-child a:before {
-		// no angle before first item
-		content: none;
 	}
 
 	li.disabled {

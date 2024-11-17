@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_guest_to_view": 1,
  "allow_rename": 1,
  "creation": "2013-01-10 16:34:31",
  "description": "Create and send emails to a specific group of subscribers periodically.",
@@ -244,7 +243,7 @@
    "fieldname": "campaign",
    "fieldtype": "Link",
    "label": "Campaign",
-   "options": "UTM Campaign"
+   "options": "Marketing Campaign"
   }
  ],
  "has_web_view": 1,
@@ -274,7 +273,7 @@
   }
  ],
  "route": "newsletters",
- "sort_field": "creation",
+ "sort_field": "modified",
  "sort_order": "ASC",
  "states": [],
  "title_field": "subject",

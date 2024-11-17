@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -18,8 +18,8 @@ class UserGroup(Document):
 		from frappe.types import DF
 
 		user_group_members: DF.TableMultiSelect[UserGroupMember]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def after_insert(self):
 		frappe.cache.delete_key("user_groups")
 

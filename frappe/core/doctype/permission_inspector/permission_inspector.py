@@ -1,4 +1,4 @@
-# Copyright (c) 2024, AiBizzApp Technologies and contributors
+# Copyright (c) 2024, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -60,15 +60,15 @@ class PermissionInspector(Document):
 		...
 
 	@staticmethod
-	def get_list():
+	def get_list(args):
 		...
 
 	@staticmethod
-	def get_count():
+	def get_count(args):
 		...
 
 	@staticmethod
-	def get_stats():
+	def get_stats(args):
 		...
 
 	def delete(self):

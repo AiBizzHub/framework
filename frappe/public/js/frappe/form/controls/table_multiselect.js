@@ -1,7 +1,6 @@
 frappe.ui.form.ControlTableMultiSelect = class ControlTableMultiSelect extends (
 	frappe.ui.form.ControlLink
 ) {
-	static horizontal = false;
 	make_input() {
 		super.make_input();
 

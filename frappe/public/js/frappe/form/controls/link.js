@@ -15,7 +15,7 @@ frappe.ui.form.ControlLink = class ControlLink extends frappe.ui.form.ControlDat
 			<input type="text" class="input-with-feedback form-control">
 			<span class="link-btn">
 				<a class="btn-clear no-decoration">
-					${frappe.utils.icon("close", "xs", "es-icon")}
+					${frappe.utils.icon("close-alt", "xs")}
 				</a>
 				<a class="btn-open no-decoration" title="${__("Open Link")}">
 					${frappe.utils.icon("arrow-right", "xs")}
@@ -608,7 +608,6 @@ frappe.ui.form.ControlLink = class ControlLink extends frappe.ui.form.ControlDat
 		link_filters.forEach((filter) => {
 			let [_, fieldname, operator, value] = filter;
 			if (value?.startsWith?.("eval:")) {
-				// get the value to calculate
 				value = value.split("eval:")[1];
 				let context = {
 					doc: this.doc,

@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-01-24 16:34:24.093128",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -36,8 +35,7 @@
    "read_only": 1
   }
  ],
- "links": [],
- "modified": "2024-03-23 16:03:34.487641",
+ "modified": "2019-05-14 13:02:58.175687",
  "modified_by": "Administrator",
  "module": "Website",
  "name": "Personal Data Download Request",
@@ -61,8 +59,7 @@
    "role": "All"
   }
  ],
- "sort_field": "creation",
+ "sort_field": "modified",
  "sort_order": "DESC",
- "states": [],
  "track_changes": 1
 }

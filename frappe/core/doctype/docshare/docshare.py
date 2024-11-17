@@ -28,7 +28,6 @@ class DocShare(Document):
 		user: DF.Link | None
 		write: DF.Check
 	# end: auto-generated types
-
 	no_feed_on_delete = True
 
 	def validate(self):

@@ -1,16 +1,9 @@
 # Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Patch Log')
 
 
-class UnitTestPatchLog(UnitTestCase):
-	"""
-	Unit tests for PatchLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPatchLog(IntegrationTestCase):
+class TestPatchLog(FrappeTestCase):
 	pass

@@ -14,16 +14,16 @@ from frappe.email.email_body import (
 	replace_filename_with_cid,
 )
 from frappe.email.receive import Email
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestEmailBody(IntegrationTestCase):
+class TestEmailBody(FrappeTestCase):
 	def setUp(self):
 		email_html = """
 <div>
 	<h3>Hey John Doe!</h3>
 	<p>This is embedded image you asked for</p>
-	<img embed="assets/frappe/images/aibizzapp-framework-logo.svg" />
+	<img embed="assets/frappe/images/aibizzapp-favicon.svg" />
 </div>
 """
 		email_text = """
@@ -31,7 +31,7 @@ Hey John Doe!
 This is the text version of this email
 """
 
-		img_path = os.path.abspath("assets/frappe/images/aibizzapp-framework-logo.svg")
+		img_path = os.path.abspath("assets/frappe/images/aibizzapp-favicon.svg")
 		with open(img_path, "rb") as f:
 			img_content = f.read()
 			img_base64 = base64.b64encode(img_content).decode()
@@ -86,7 +86,7 @@ This is the text version of this email
 Content-Type: image/svg+xml
 MIME-Version: 1.0
 Content-Transfer-Encoding: base64
-Content-Disposition: inline; filename="aibizzapp-framework-logo.svg"
+Content-Disposition: inline; filename="aibizzapp-favicon.svg"
 """
 		self.assertTrue(img_signature in self.email_string)
 		self.assertTrue(self.img_base64 in self.email_string)
@@ -122,7 +122,7 @@ w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 	def test_replace_filename_with_cid(self):
 		original_message = """
 			<div>
-				<img embed="assets/frappe/images/aibizzapp-framework-logo.svg" alt="test" />
+				<img embed="assets/frappe/images/aibizzapp-favicon.svg" alt="test" />
 				<img embed="notexists.jpg" />
 			</div>
 		"""
@@ -200,10 +200,6 @@ Reply-To: test2_@erpnext.com
 			"=?iso-2022-jp?B?VEFLQVlBTUEgS2FvcnUgWxskQnxiOzMbKEIgGyRCNzAbKEJd?=\n\t<user@example.com>"
 		)
 		self.assertIn("user@example.com", mail)
-
-	def test_poorly_encoded_messages2(self):
-		mail = Email.decode_email(" =?UTF-8?B?X\xe0\xe0Y?=  <xy@example.com>")
-		self.assertIn("xy@example.com", mail)
 
 
 def fixed_column_width(string, chunk_size):

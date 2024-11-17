@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -15,5 +15,4 @@ class WorkflowActionMaster(Document):
 
 		workflow_action_name: DF.Data
 	# end: auto-generated types
-
 	pass

@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -17,8 +17,8 @@ class EmailGroupMember(Document):
 		email: DF.Data
 		email_group: DF.Link
 		unsubscribed: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def after_delete(self):
 		email_group = frappe.get_doc("Email Group", self.email_group)
 		email_group.update_total_subscribers()

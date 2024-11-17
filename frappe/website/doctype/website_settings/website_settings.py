@@ -6,7 +6,7 @@ from urllib.parse import quote
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, encode, get_request_site_address
+from frappe.utils import encode, get_request_site_address
 from frappe.website.utils import get_boot_data
 
 
@@ -218,7 +218,7 @@ def get_website_settings(context=None):
 		"linked_in_share",
 		"disable_signup",
 	]:
-		context[k] = cint(context.get(k))
+		context[k] = int(context.get(k) or 0)
 
 	if settings.address:
 		context["footer_address"] = settings.address
@@ -229,8 +229,8 @@ def get_website_settings(context=None):
 	context.encoded_title = quote(encode(context.title or ""), "")
 
 	context.web_include_js = hooks.web_include_js or []
+
 	context.web_include_css = hooks.web_include_css or []
-	context.web_include_icons = hooks.web_include_icons or []
 
 	via_hooks = hooks.website_context or []
 	for key in via_hooks:
@@ -249,7 +249,7 @@ def get_website_settings(context=None):
 		context.theme = get_active_theme() or frappe._dict()
 
 	if not context.get("favicon"):
-		context["favicon"] = "/assets/frappe/images/aibizzapp-framework-logo.svg"
+		context["favicon"] = "/assets/frappe/images/aibizzapp-favicon.svg"
 
 	if settings.favicon and settings.favicon != "attach_files:":
 		context["favicon"] = settings.favicon

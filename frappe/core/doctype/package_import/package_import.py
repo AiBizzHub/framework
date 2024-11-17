@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import json
@@ -26,8 +26,8 @@ class PackageImport(Document):
 		attach_package: DF.Attach | None
 		force: DF.Check
 		log: DF.Code | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if self.activate:
 			self.import_package()

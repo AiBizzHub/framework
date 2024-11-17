@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp and Contributors
+# Copyright (c) 2022, Frappe and Contributors
 # License: MIT. See LICENSE
 
 

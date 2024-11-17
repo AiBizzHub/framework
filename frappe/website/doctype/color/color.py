@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -16,5 +16,4 @@ class Color(Document):
 
 		color: DF.Color
 	# end: auto-generated types
-
 	pass

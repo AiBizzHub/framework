@@ -13,10 +13,10 @@ export default class ListFilter {
 	make() {
 		// init dom
 		this.wrapper.html(`
-			<div class="input-area"></div>
-			<div class="sidebar-action">
+			<li class="input-area"></li>
+			<li class="sidebar-action">
 				<a class="saved-filters-preview">${__("Show Saved")}</a>
-			</div>
+			</li>
 			<div class="saved-filters"></div>
 		`);
 
@@ -56,16 +56,9 @@ export default class ListFilter {
 
 	refresh() {
 		this.get_list_filters().then(() => {
-			if (this.filters.length) {
-				// expand collapsible sections
-				this.wrapper.hasClass("hide") && this.section_title.trigger("click");
-				this.$saved_filters_preview.show();
-			} else {
-				// hide collapsible sections
-				!this.wrapper.hasClass("hide") && this.section_title.trigger("click");
-				this.$saved_filters_preview.hide();
-			}
-
+			this.filters.length
+				? this.$saved_filters_preview.show()
+				: this.$saved_filters_preview.hide();
 			const html = this.filters.map((filter) => this.filter_template(filter));
 			this.wrapper.find(".filter-pill").remove();
 			this.$saved_filters.append(html);

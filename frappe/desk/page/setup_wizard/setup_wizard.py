@@ -32,8 +32,8 @@ def get_setup_stages(args):  # nosemgrep
 	stages.append(
 		{
 			# post executing hooks
-			"status": _("Wrapping up"),
-			"fail_msg": _("Failed to complete setup"),
+			"status": "Wrapping up",
+			"fail_msg": "Failed to complete setup",
 			"tasks": [{"fn": run_post_setup_complete, "args": args, "fail_msg": "Failed to complete setup"}],
 		}
 	)
@@ -307,7 +307,7 @@ def load_languages():
 	}
 
 
-@frappe.whitelist(allow_guest=True)
+@frappe.whitelist()
 def load_country():
 	from frappe.sessions import get_geo_ip_country
 

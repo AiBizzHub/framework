@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from typing import Protocol, runtime_checkable
@@ -40,8 +40,8 @@ class LogSettings(Document):
 		from frappe.types import DF
 
 		logs_to_clear: DF.Table[LogsToClear]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.remove_unsupported_doctypes()
 		self._deduplicate_entries()
@@ -181,7 +181,7 @@ def clear_log_table(doctype, days=90):
 		frappe.db.sql(
 			f"""INSERT INTO `{temporary}`
 				SELECT * FROM `{original}`
-				WHERE `{original}`.`creation` > NOW() - INTERVAL '{days}' DAY"""
+				WHERE `{original}`.`modified` > NOW() - INTERVAL '{days}' DAY"""
 		)
 		frappe.db.sql_ddl(f"RENAME TABLE `{original}` TO `{backup}`, `{temporary}` TO `{original}`")
 	except Exception:

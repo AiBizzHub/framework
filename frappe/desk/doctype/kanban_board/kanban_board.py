@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -26,8 +26,8 @@ class KanbanBoard(Document):
 		private: DF.Check
 		reference_doctype: DF.Link
 		show_labels: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.validate_column_name()
 

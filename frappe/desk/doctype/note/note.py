@@ -22,8 +22,8 @@ class Note(Document):
 		public: DF.Check
 		seen_by: DF.Table[NoteSeenBy]
 		title: DF.Data
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if self.notify_on_login and not self.expire_notification_on:
 			# expire this notification in a week (default)
@@ -61,4 +61,4 @@ def get_permission_query_conditions(user):
 
 
 def has_permission(doc, user):
-	return bool(doc.public or doc.owner == user)
+	return doc.public or doc.owner == user

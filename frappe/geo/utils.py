@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -19,7 +19,7 @@ def get_coords(doctype, filters, type):
 
 
 def convert_to_geojson(type, coords):
-	"""Convert GPS coordinates to geoJSON string."""
+	"""Converts GPS coordinates to geoJSON string."""
 	geojson = {"type": "FeatureCollection", "features": None}
 
 	if type == "location_field":
@@ -90,7 +90,7 @@ def return_coordinates(doctype, filters_sql):
 
 
 def get_coords_conditions(doctype, filters=None):
-	"""Return SQL conditions with user permissions and filters for event queries."""
+	"""Returns SQL conditions with user permissions and filters for event queries."""
 	from frappe.desk.reportview import get_filters_cond
 
 	if not frappe.has_permission(doctype):

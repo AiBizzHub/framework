@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import glob
@@ -47,7 +47,7 @@ def get_latest_backup_file(with_files=False):
 
 	odb = BackupGenerator(
 		frappe.conf.db_name,
-		frappe.conf.db_user,
+		frappe.conf.db_name,
 		frappe.conf.db_password,
 		db_socket=frappe.conf.db_socket,
 		db_host=frappe.conf.db_host,
@@ -106,7 +106,7 @@ def generate_files_backup():
 
 	backup = BackupGenerator(
 		frappe.conf.db_name,
-		frappe.conf.db_user,
+		frappe.conf.db_name,
 		frappe.conf.db_password,
 		db_socket=frappe.conf.db_socket,
 		db_host=frappe.conf.db_host,

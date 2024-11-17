@@ -1,4 +1,4 @@
-// Copyright (c) 2019, AiBizzApp Technologies and contributors
+// Copyright (c) 2019, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("Data Import", {
@@ -135,29 +135,34 @@ frappe.ui.form.on("Data Import", {
 				let failed_records = cint(r.message.failed);
 				let total_records = cint(r.message.total_records);
 
-				if (!total_records) {
-					return;
-				}
-
-				let message;
+				if (!total_records) return;
+				let action, message;
 				if (frm.doc.import_type === "Insert New Records") {
-					message = __("Successfully imported {0} out of {1} records.", [
-						successful_records,
-						total_records,
-					]);
+					action = "imported";
 				} else {
-					message = __("Successfully updated {0} out of {1} records.", [
-						successful_records,
-						total_records,
-					]);
+					action = "updated";
 				}
 
-				if (failed_records > 0) {
-					message +=
-						"<br/>" +
-						__(
-							"Please click on 'Export Errored Rows', fix the errors and import again."
+				if (failed_records === 0) {
+					let message_args = [action, successful_records];
+					if (successful_records === 1) {
+						message = __("Successfully {0} 1 record.", message_args);
+					} else {
+						message = __("Successfully {0} {1} records.", message_args);
+					}
+				} else {
+					let message_args = [action, successful_records, total_records];
+					if (successful_records === 1) {
+						message = __(
+							"Successfully {0} {1} record out of {2}. Click on Export Errored Rows, fix the errors and import again.",
+							message_args
 						);
+					} else {
+						message = __(
+							"Successfully {0} {1} records out of {2}. Click on Export Errored Rows, fix the errors and import again.",
+							message_args
+						);
+					}
 				}
 
 				// If the job timed out, display an extra hint

@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and Contributors
+# Copyright (c) 2022, AiBizzHub, LLC and Contributors
 # See license.txt
 
 import frappe
@@ -7,20 +7,11 @@ from frappe.core.doctype.document_naming_settings.document_naming_settings impor
 	DocumentNamingSettings,
 )
 from frappe.model.naming import NamingSeries, get_default_naming_series
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import cint
 
 
-class UnitTestDocumentNamingSettings(UnitTestCase):
-	"""
-	Unit tests for DocumentNamingSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestNamingSeries(IntegrationTestCase):
+class TestNamingSeries(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -49,8 +40,8 @@ class TestNamingSeries(IntegrationTestCase):
 
 	def get_valid_serieses(self):
 		VALID_SERIES = ["SINV-", "SI-.{field}.", "SI-#.###", ""]
-		existing_series = self.dns.get_transactions_and_prefixes()["prefixes"]
-		return VALID_SERIES + existing_series
+		exisiting_series = self.dns.get_transactions_and_prefixes()["prefixes"]
+		return VALID_SERIES + exisiting_series
 
 	def test_naming_preview(self):
 		self.dns.transaction_type = self.ns_doctype
@@ -98,12 +89,16 @@ class TestNamingSeries(IntegrationTestCase):
 		self.dns.update_amendment_rule()
 
 		submittable_doc = frappe.get_doc(
-			doctype=self.ns_doctype, some_fieldname="test doc with submit"
+			dict(doctype=self.ns_doctype, some_fieldname="test doc with submit")
 		).submit()
 		submittable_doc.cancel()
 
 		amended_doc = frappe.get_doc(
-			doctype=self.ns_doctype, some_fieldname="test doc with submit", amended_from=submittable_doc.name
+			dict(
+				doctype=self.ns_doctype,
+				some_fieldname="test doc with submit",
+				amended_from=submittable_doc.name,
+			)
 		).insert()
 
 		self.assertIn(submittable_doc.name, amended_doc.name)
@@ -113,6 +108,10 @@ class TestNamingSeries(IntegrationTestCase):
 		self.dns.update_amendment_rule()
 
 		new_amended_doc = frappe.get_doc(
-			doctype=self.ns_doctype, some_fieldname="test doc with submit", amended_from=submittable_doc.name
+			dict(
+				doctype=self.ns_doctype,
+				some_fieldname="test doc with submit",
+				amended_from=submittable_doc.name,
+			)
 		).insert()
 		self.assertNotIn(submittable_doc.name, new_amended_doc.name)

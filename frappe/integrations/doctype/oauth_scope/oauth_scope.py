@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -19,5 +19,4 @@ class OAuthScope(Document):
 		parenttype: DF.Data
 		scope: DF.Data | None
 	# end: auto-generated types
-
 	pass

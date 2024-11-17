@@ -19,14 +19,14 @@
 			</div>
 
 			<div class="flex config-area">
-				<label v-if="allow_toggle_optimize" class="frappe-checkbox"
+				<label v-if="is_optimizable" class="frappe-checkbox"
 					><input
 						type="checkbox"
 						:checked="optimize"
 						@change="emit('toggle_optimize')"
 					/>{{ __("Optimize") }}</label
 				>
-				<label v-if="allow_toggle_private" class="frappe-checkbox"
+				<label class="frappe-checkbox"
 					><input
 						type="checkbox"
 						:checked="file.private"
@@ -79,12 +79,6 @@ let emit = defineEmits(["toggle_optimize", "toggle_private", "toggle_image_cropp
 // props
 const props = defineProps({
 	file: Object,
-	allow_toggle_private: {
-		default: true,
-	},
-	allow_toggle_optimize: {
-		default: true,
-	},
 });
 
 // variables
@@ -104,15 +98,9 @@ let uploaded = computed(() => {
 let is_image = computed(() => {
 	return props.file.file_obj.type.startsWith("image");
 });
-let allow_toggle_optimize = computed(() => {
+let is_optimizable = computed(() => {
 	let is_svg = props.file.file_obj.type == "image/svg+xml";
-	return (
-		props.allow_toggle_optimize &&
-		is_image.value &&
-		!is_svg &&
-		!uploaded.value &&
-		!props.file.failed
-	);
+	return is_image.value && !is_svg && !uploaded.value && !props.file.failed;
 });
 let is_cropable = computed(() => {
 	let croppable_types = ["image/jpeg", "image/png"];

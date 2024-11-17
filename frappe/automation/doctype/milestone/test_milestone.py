@@ -1,17 +1,8 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestMilestone(UnitTestCase):
-	"""
-	Unit tests for Milestone.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestMilestone(IntegrationTestCase):
+class TestMilestone(FrappeTestCase):
 	pass

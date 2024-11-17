@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -23,8 +23,8 @@ class InstalledApplications(Document):
 		from frappe.types import DF
 
 		installed_applications: DF.Table[InstalledApplication]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def update_versions(self):
 		self.delete_key("installed_applications")
 		for app in frappe.utils.get_installed_apps_info():

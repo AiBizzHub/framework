@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -19,14 +19,13 @@ class PrintStyle(Document):
 		preview: DF.AttachImage | None
 		print_style_name: DF.Data
 		standard: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if (
 			self.standard == 1
 			and not frappe.local.conf.get("developer_mode")
-			and not frappe.flags.in_import
-			and not frappe.flags.in_test
+			and not (frappe.flags.in_import or frappe.flags.in_test)
 		):
 			frappe.throw(frappe._("Standard Print Style cannot be changed. Please duplicate to edit."))
 

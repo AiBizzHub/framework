@@ -1,17 +1,8 @@
-# Copyright (c) 2017, AiBizzApp Technologies and Contributors
+# Copyright (c) 2017, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestPrintStyle(UnitTestCase):
-	"""
-	Unit tests for PrintStyle.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPrintStyle(IntegrationTestCase):
+class TestPrintStyle(FrappeTestCase):
 	pass

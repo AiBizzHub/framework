@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe

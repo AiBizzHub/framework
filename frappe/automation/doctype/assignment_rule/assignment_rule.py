@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from collections.abc import Iterable
@@ -38,8 +38,8 @@ class AssignmentRule(Document):
 		rule: DF.Literal["Round Robin", "Load Balancing", "Based on Field"]
 		unassign_condition: DF.Code | None
 		users: DF.TableMultiSelect[AssignmentRuleUser]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.validate_document_types()
 		self.validate_assignment_days()

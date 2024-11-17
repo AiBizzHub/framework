@@ -1,17 +1,8 @@
-# Copyright (c) 2021, AiBizzApp Technologies and Contributors
+# Copyright (c) 2021, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestUserGroupMember(UnitTestCase):
-	"""
-	Unit tests for UserGroupMember.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestUserGroupMember(IntegrationTestCase):
+class TestUserGroupMember(FrappeTestCase):
 	pass

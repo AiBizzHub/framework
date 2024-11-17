@@ -1,17 +1,8 @@
-# Copyright (c) 2020, AiBizzApp Technologies and Contributors
+# Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestAboutUsSettings(UnitTestCase):
-	"""
-	Unit tests for AboutUsSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestAboutUsSettings(IntegrationTestCase):
+class TestAboutUsSettings(FrappeTestCase):
 	pass

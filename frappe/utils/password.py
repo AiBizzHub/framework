@@ -12,6 +12,7 @@ from frappe.utils import cstr, encode
 
 Auth = Table("__Auth")
 
+
 passlibctx = CryptContext(
 	schemes=[
 		"pbkdf2_sha256",
@@ -34,13 +35,7 @@ def get_decrypted_password(doctype, name, fieldname="password", raise_exception=
 	).run()
 
 	if result and result[0][0]:
-		try:
-			return decrypt(result[0][0], key=f"{doctype}.{name}.{fieldname}")
-		except frappe.ValidationError as e:
-			if raise_exception:
-				raise e
-
-			return None
+		return decrypt(result[0][0], key=f"{doctype}.{name}.{fieldname}")
 
 	elif raise_exception:
 		frappe.throw(
@@ -109,7 +104,9 @@ def check_password(user, pwd, doctype="User", fieldname="password", delete_track
 
 
 def delete_login_failed_cache(user):
+	frappe.cache.hdel("last_login_tried", user)
 	frappe.cache.hdel("login_failed_count", user)
+	frappe.cache.hdel("locked_account_time", user)
 
 
 def update_password(user, pwd, doctype="User", fieldname="password", logout_all_sessions=False):

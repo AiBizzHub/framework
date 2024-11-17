@@ -22,9 +22,10 @@ doctype_python_modules = {}
 
 
 def export_module_json(doc: "Document", is_standard: bool, module: str) -> str | None:
-	"""Make a folder for the given doc and add its json file (make it a standard object that will be synced).
+	"""Make a folder for the given doc and add its json file (make it a standard
+	object that will be synced)
 
-	Return the absolute file_path without the extension.
+	Returns the absolute file_path without the extension.
 	Eg: For exporting a Print Format "_Test Print Format 1", the return value will be
 	`/home/gavin/frappe-bench/apps/frappe/frappe/core/print_format/_test_print_format_1/_test_print_format_1`
 	"""
@@ -193,12 +194,12 @@ def sync_customizations_for_doctype(data: dict, folder: str, filename: str = "")
 
 
 def scrub_dt_dn(dt: str, dn: str) -> tuple[str, str]:
-	"""Return in lowercase and code friendly names of doctype and name for certain types."""
+	"""Returns in lowercase and code friendly names of doctype and name for certain types"""
 	return scrub(dt), scrub(dn)
 
 
 def get_doc_path(module: str, doctype: str, name: str) -> str:
-	"""Return path of a doc in a module."""
+	"""Returns path of a doc in a module"""
 	return os.path.join(get_module_path(module), *scrub_dt_dn(doctype, name))
 
 
@@ -225,7 +226,7 @@ def export_doc(doctype, name, module=None):
 
 
 def get_doctype_module(doctype: str) -> str:
-	"""Return **Module Def** name of given doctype."""
+	"""Returns **Module Def** name of given doctype."""
 	doctype_module_map = frappe.cache.get_value(
 		"doctype_modules",
 		generator=lambda: dict(frappe.qb.from_("DocType").select("name", "module").run()),
@@ -238,7 +239,7 @@ def get_doctype_module(doctype: str) -> str:
 
 
 def load_doctype_module(doctype, module=None, prefix="", suffix=""):
-	"""Return the module object for given doctype.
+	"""Returns the module object for given doctype.
 
 	Note: This will return the standard defined module object for the doctype irrespective
 	of the `override_doctype_class` hook.
@@ -312,27 +313,24 @@ def make_boilerplate(
 			dedent(
 				"""
 			def db_insert(self, *args, **kwargs):
-				raise NotImplementedError
+				pass
 
 			def load_from_db(self):
-				raise NotImplementedError
+				pass
 
 			def db_update(self):
-				raise NotImplementedError
-
-			def delete(self):
-				raise NotImplementedError
-
-			@staticmethod
-			def get_list(filters=None, page_length=20, **kwargs):
 				pass
 
 			@staticmethod
-			def get_count(filters=None, **kwargs):
+			def get_list(args):
 				pass
 
 			@staticmethod
-			def get_stats(**kwargs):
+			def get_count(args):
+				pass
+
+			@staticmethod
+			def get_stats(args):
 				pass
 			"""
 			),

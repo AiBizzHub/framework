@@ -7,10 +7,10 @@ from pypdf import PdfReader
 import frappe
 import frappe.utils.pdf as pdfgen
 from frappe.core.doctype.file.test_file import make_test_image_file
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestPdf(IntegrationTestCase):
+class TestPdf(FrappeTestCase):
 	@property
 	def html(self):
 		return """<style>

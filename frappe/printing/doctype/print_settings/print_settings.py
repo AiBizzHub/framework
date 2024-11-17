@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -63,8 +63,8 @@ class PrintSettings(Document):
 		repeat_header_footer: DF.Check
 		send_print_as_pdf: DF.Check
 		with_letterhead: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if self.pdf_page_size == "Custom" and not (self.pdf_page_height and self.pdf_page_width):
 			frappe.throw(_("Page height and width cannot be zero"))

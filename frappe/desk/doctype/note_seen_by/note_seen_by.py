@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -18,5 +18,4 @@ class NoteSeenBy(Document):
 		parenttype: DF.Data
 		user: DF.Link | None
 	# end: auto-generated types
-
 	pass

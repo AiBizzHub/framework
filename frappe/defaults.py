@@ -79,7 +79,7 @@ def is_a_user_permission_key(key):
 
 
 def not_in_user_permission(key, value, user=None):
-	# return true or false based on if value exist in user permission
+	# returns true or false based on if value exist in user permission
 	user = user or frappe.session.user
 	user_permission = get_user_permissions(user).get(frappe.unscrub(key)) or []
 
@@ -167,9 +167,6 @@ def set_default(key, value, parent, parenttype="__default"):
 		add_default(key, value, parent)
 	else:
 		_clear_cache(parent)
-
-	if parent:
-		clear_defaults_cache(parent)
 
 
 def add_default(key, value, parent, parenttype=None):

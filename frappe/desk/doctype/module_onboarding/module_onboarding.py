@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -26,8 +26,8 @@ class ModuleOnboarding(Document):
 		subtitle: DF.Data
 		success_message: DF.Data
 		title: DF.Data
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def on_update(self):
 		if frappe.conf.developer_mode:
 			export_to_files(record_list=[["Module Onboarding", self.name]], record_module=self.module)

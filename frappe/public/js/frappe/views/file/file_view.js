@@ -191,8 +191,6 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 	prepare_datum(d) {
 		let icon_class = "";
 		let type = "";
-		let title;
-
 		if (d.is_folder) {
 			icon_class = "folder-normal";
 			type = "folder";
@@ -204,12 +202,7 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 			type = "file";
 		}
 
-		if (type === "folder") {
-			title = this.get_folder_title(d.file_name);
-		} else {
-			title = d.file_name || d.file_url;
-		}
-
+		let title = d.file_name || d.file_url;
 		title = title.slice(0, 60);
 		d._title = title;
 		d.icon_class = icon_class;
@@ -221,16 +214,6 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 			${d.is_private ? '<i class="fa fa-lock fa-fw text-warning"></i>' : ""}
 		`;
 		return d;
-	}
-
-	get_folder_title(folder_name) {
-		// "Home" and "Attachments" are default folders that are always created in english.
-		// So we can and should translate them to the user's language.
-		if (["Home", "Attachments"].includes(folder_name)) {
-			return __(folder_name);
-		} else {
-			return folder_name;
-		}
 	}
 
 	before_render() {
@@ -307,10 +290,8 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 
 		return folders
 			.map((folder, i) => {
-				const title = this.get_folder_title(folder);
-
 				if (i === folders.length - 1) {
-					return `<span>${title}</span>`;
+					return `<span>${folder}</span>`;
 				}
 				const route = folders.reduce((acc, curr, j) => {
 					if (j <= i) {
@@ -319,7 +300,7 @@ frappe.views.FileView = class FileView extends frappe.views.ListView {
 					return acc;
 				}, "/app/file/view");
 
-				return `<a href="${route}">${title}</a>`;
+				return `<a href="${route}">${folder}</a>`;
 			})
 			.join("&nbsp;/&nbsp;");
 	}

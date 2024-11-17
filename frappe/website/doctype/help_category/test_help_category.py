@@ -1,17 +1,10 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Help Category')
 
 
-class UnitTestHelpCategory(UnitTestCase):
-	"""
-	Unit tests for HelpCategory.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestHelpCategory(IntegrationTestCase):
+class TestHelpCategory(FrappeTestCase):
 	pass

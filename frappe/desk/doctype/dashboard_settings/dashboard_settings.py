@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -21,7 +21,6 @@ class DashboardSettings(Document):
 		chart_config: DF.Code | None
 		user: DF.Link | None
 	# end: auto-generated types
-
 	pass
 
 

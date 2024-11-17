@@ -5,7 +5,6 @@ import gzip
 import json
 import os
 import re
-import shutil
 import subprocess
 import sys
 from collections import OrderedDict
@@ -25,7 +24,7 @@ from frappe.utils.synchronization import filelock
 def _is_scheduler_enabled(site) -> bool:
 	enable_scheduler = False
 	try:
-		frappe.init(site)
+		frappe.init(site=site)
 		frappe.connect()
 		enable_scheduler = cint(frappe.db.get_single_value("System Settings", "enable_scheduler"))
 	except Exception:
@@ -46,28 +45,38 @@ def _new_site(
 	install_apps=None,
 	source_sql=None,
 	force=False,
+	reinstall=False,
 	db_password=None,
 	db_type=None,
-	db_socket=None,
 	db_host=None,
 	db_port=None,
-	db_user=None,
 	setup_db=True,
-	rollback_callback=None,
 	mariadb_user_host_login_scope=None,
+	db_socket=None,
 ):
-	"""Install a new AiBizzApp site"""
+	"""Install a new Frappe site"""
 
 	from frappe.utils import scheduler
 
 	if not force and os.path.exists(site):
-		print(f"Site {site} already exists, use `--force` to proceed anyway")
+		print(f"Site {site} already exists")
 		sys.exit(1)
 
-	frappe.init(site)
+	if mariadb_user_host_login_scope and not db_type == "mariadb":
+		print("--no-mariadb-socket requires db_type to be set to mariadb.")
+		sys.exit(1)
+
+	frappe.init(site=site)
 
 	if not db_name:
-		db_name = f"_{frappe.generate_hash(length=16)}"
+		import hashlib
+
+		db_name = (
+			"_"
+			+ hashlib.sha1(
+				os.path.realpath(frappe.get_site_path()).encode(), usedforsecurity=False
+			).hexdigest()[:16]
+		)
 
 	try:
 		# enable scheduler post install?
@@ -76,8 +85,6 @@ def _new_site(
 		enable_scheduler = False
 
 	make_site_dirs()
-	if rollback_callback:
-		rollback_callback.add(lambda: shutil.rmtree(frappe.get_site_path()))
 
 	with filelock("bench_new_site", timeout=1):
 		install_db(
@@ -88,18 +95,17 @@ def _new_site(
 			verbose=verbose,
 			source_sql=source_sql,
 			force=force,
+			reinstall=reinstall,
 			db_password=db_password,
 			db_type=db_type,
 			db_socket=db_socket,
 			db_host=db_host,
 			db_port=db_port,
-			db_user=db_user,
 			setup=setup_db,
-			rollback_callback=rollback_callback,
 			mariadb_user_host_login_scope=mariadb_user_host_login_scope,
 		)
 
-		apps_to_install = ["frappe"] + (frappe.conf.get("install_apps") or []) + (list(install_apps or []))
+		apps_to_install = ["frappe"] + (frappe.conf.get("install_apps") or []) + (list(install_apps) or [])
 
 		for app in apps_to_install:
 			# NOTE: not using force here for 2 reasons:
@@ -126,18 +132,17 @@ def install_db(
 	verbose=True,
 	force=0,
 	site_config=None,
+	reinstall=False,
 	db_password=None,
 	db_type=None,
-	db_socket=None,
 	db_host=None,
 	db_port=None,
-	db_user=None,
 	setup=True,
-	rollback_callback=None,
 	mariadb_user_host_login_scope=None,
+	db_socket=None,
 ):
 	import frappe.database
-	from frappe.database import bootstrap_database, drop_user_and_database, setup_database
+	from frappe.database import bootstrap_database, setup_database
 
 	if not db_type:
 		db_type = frappe.conf.db_type
@@ -155,7 +160,6 @@ def install_db(
 		db_socket=db_socket,
 		db_host=db_host,
 		db_port=db_port,
-		db_user=db_user,
 	)
 	frappe.flags.in_install_db = True
 
@@ -164,8 +168,6 @@ def install_db(
 
 	if setup:
 		setup_database(force, verbose, mariadb_user_host_login_scope)
-		if rollback_callback:
-			rollback_callback.add(lambda: drop_user_and_database(db_name, db_user or db_name))
 
 	bootstrap_database(
 		verbose=verbose,
@@ -429,7 +431,7 @@ def _delete_modules(modules: list[str], dry_run: bool) -> list[str]:
 
 	Note: All record linked linked to Module Def are also deleted.
 
-	Return: list of deleted doctypes."""
+	Returns: list of deleted doctypes."""
 	drop_doctypes = []
 
 	doctype_link_field_map = _get_module_linked_doctype_field_map()
@@ -468,7 +470,7 @@ def _delete_linked_documents(module_name: str, doctype_linkfield_map: dict[str, 
 def _get_module_linked_doctype_field_map() -> dict[str, str]:
 	"""Get all the doctypes which have module linked with them.
 
-	Return ordered dictionary with doctype->link field mapping."""
+	returns ordered dictionary with doctype->link field mapping."""
 
 	# Hardcoded to change order of deletion
 	ordered_doctypes = [
@@ -544,10 +546,9 @@ def make_conf(
 	db_password=None,
 	site_config=None,
 	db_type=None,
-	db_socket=None,
 	db_host=None,
 	db_port=None,
-	db_user=None,
+	db_socket=None,
 ):
 	site = frappe.local.site
 	make_site_config(
@@ -555,10 +556,9 @@ def make_conf(
 		db_password,
 		site_config,
 		db_type=db_type,
-		db_socket=db_socket,
 		db_host=db_host,
 		db_port=db_port,
-		db_user=db_user,
+		db_socket=db_socket,
 	)
 	sites_path = frappe.local.sites_path
 	frappe.destroy()
@@ -573,7 +573,6 @@ def make_site_config(
 	db_socket=None,
 	db_host=None,
 	db_port=None,
-	db_user=None,
 ):
 	frappe.create_folder(os.path.join(frappe.local.site_path))
 	site_file = get_site_config_path()
@@ -593,8 +592,6 @@ def make_site_config(
 
 			if db_port:
 				site_config["db_port"] = db_port
-
-			site_config["db_user"] = db_user or db_name
 
 		with open(site_file, "w") as f:
 			f.write(json.dumps(site_config, indent=1, sort_keys=True))
@@ -753,7 +750,7 @@ def extract_files(site_name, file_path):
 	file_path = get_bench_relative_path(file_path)
 
 	# Need to do frappe.init to maintain the site locals
-	frappe.init(site_name)
+	frappe.init(site=site_name)
 	abs_site_path = os.path.abspath(frappe.get_site_path())
 
 	# Copy the files to the parent directory and extract
@@ -803,10 +800,10 @@ def is_downgrade(sql_file_path, verbose=False):
 def get_old_backup_version(sql_file_path: str) -> Version | None:
 	"""Return the frappe version used to create the specified database dump.
 
-	This methods supports older versions of AiBizzApp wich used a different format.
+	This methods supports older versions of Frappe wich used a different format.
 	"""
 	header = get_db_dump_header(sql_file_path).split("\n")
-	if match := re.search(r"AiBizzApp (\d+\.\d+\.\d+)", header[0]):
+	if match := re.search(r"Frappe (\d+\.\d+\.\d+)", header[0]):
 		return Version(match[1])
 	return None
 
@@ -848,10 +845,10 @@ def partial_restore(sql_file_path, verbose=False):
 
 		warn = click.style(
 			"Delete the tables you want to restore manually before attempting"
-			" partial restore operation for PostgreSQL databases",
+			" partial restore operation for PostreSQL databases",
 			fg="yellow",
 		)
-		warnings.warn(warn, stacklevel=2)
+		warnings.warn(warn, stacklevel=1)
 	else:
 		click.secho("Unsupported database type", fg="red")
 		return

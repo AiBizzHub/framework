@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -17,12 +17,11 @@ class OAuthProviderSettings(Document):
 
 		skip_authorization: DF.Literal["Force", "Auto"]
 	# end: auto-generated types
-
 	pass
 
 
 def get_oauth_settings():
-	"""Return OAuth settings."""
+	"""Returns oauth settings"""
 	return frappe._dict(
 		{"skip_authorization": frappe.db.get_single_value("OAuth Provider Settings", "skip_authorization")}
 	)

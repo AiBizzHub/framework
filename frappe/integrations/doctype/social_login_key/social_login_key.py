@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -58,7 +58,7 @@ class SocialLoginKey(Document):
 		social_login_provider: DF.Literal[
 			"Custom",
 			"Facebook",
-			"AiBizzApp",
+			"Frappe",
 			"GitHub",
 			"Google",
 			"Office 365",
@@ -67,8 +67,8 @@ class SocialLoginKey(Document):
 			"Keycloak",
 		]
 		user_id_property: DF.Data | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def autoname(self):
 		self.name = frappe.scrub(self.provider_name)
 
@@ -92,7 +92,7 @@ class SocialLoginKey(Document):
 	def set_icon(self):
 		icon_map = {
 			"Google": "google.svg",
-			"AiBizzApp": "frappe.svg",
+			"Frappe": "frappe.svg",
 			"Facebook": "facebook.svg",
 			"Office 365": "office_365.svg",
 			"GitHub": "github.svg",
@@ -173,11 +173,11 @@ class SocialLoginKey(Document):
 			),
 		}
 
-		providers["AiBizzApp"] = {
-			"provider_name": "AiBizzApp",
+		providers["Frappe"] = {
+			"provider_name": "Frappe",
 			"enable_social_login": 1,
 			"custom_base_url": 1,
-			"icon": "/assets/frappe/images/aibizzapp-framework-logo.svg",
+			"icon": "/assets/frappe/images/aibizzapp-favicon.svg",
 			"redirect_url": "/api/method/frappe.integrations.oauth2_logins.login_via_frappe",
 			"api_endpoint": "/api/method/frappe.integrations.oauth2.openid_profile",
 			"api_endpoint_args": None,

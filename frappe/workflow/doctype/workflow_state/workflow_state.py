@@ -160,5 +160,4 @@ class WorkflowState(Document):
 		style: DF.Literal["", "Primary", "Info", "Success", "Warning", "Danger", "Inverse"]
 		workflow_state_name: DF.Data
 	# end: auto-generated types
-
 	pass

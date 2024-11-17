@@ -1,23 +1,14 @@
-# Copyright (c) 2021, AiBizzApp Technologies and Contributors
+# Copyright (c) 2021, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import make_test_records
+from frappe.test_runner import make_test_records
+from frappe.tests.utils import FrappeTestCase
 
 TEST_DOCTYPE = "Assignment Test"
 
 
-class UnitTestAssignmentRule(UnitTestCase):
-	"""
-	Unit tests for AssignmentRule.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestAutoAssign(IntegrationTestCase):
+class TestAutoAssign(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -258,15 +249,17 @@ class TestAutoAssign(IntegrationTestCase):
 		frappe.db.delete("Assignment Rule")
 
 		assignment_rule = frappe.get_doc(
-			name="Assignment with Due Date",
-			doctype="Assignment Rule",
-			document_type=TEST_DOCTYPE,
-			assign_condition="public == 0",
-			due_date_based_on="expiry_date",
-			assignment_days=self.days,
-			users=[
-				dict(user="test@example.com"),
-			],
+			dict(
+				name="Assignment with Due Date",
+				doctype="Assignment Rule",
+				document_type=TEST_DOCTYPE,
+				assign_condition="public == 0",
+				due_date_based_on="expiry_date",
+				assignment_days=self.days,
+				users=[
+					dict(user="test@example.com"),
+				],
+			)
 		).insert()
 
 		expiry_date = frappe.utils.add_days(frappe.utils.nowdate(), 2)
@@ -358,35 +351,39 @@ def get_assignment_rule(days, assign=None):
 		assign = ["public == 1", "notify_on_login == 1"]
 
 	assignment_rule = frappe.get_doc(
-		name=f"For {TEST_DOCTYPE} 1",
-		doctype="Assignment Rule",
-		priority=0,
-		document_type=TEST_DOCTYPE,
-		assign_condition=assign[0],
-		unassign_condition="public == 0 or notify_on_login == 1",
-		close_condition='"Closed" in content',
-		rule="Round Robin",
-		assignment_days=days[0],
-		users=[
-			dict(user="test@example.com"),
-			dict(user="test1@example.com"),
-			dict(user="test2@example.com"),
-		],
+		dict(
+			name=f"For {TEST_DOCTYPE} 1",
+			doctype="Assignment Rule",
+			priority=0,
+			document_type=TEST_DOCTYPE,
+			assign_condition=assign[0],
+			unassign_condition="public == 0 or notify_on_login == 1",
+			close_condition='"Closed" in content',
+			rule="Round Robin",
+			assignment_days=days[0],
+			users=[
+				dict(user="test@example.com"),
+				dict(user="test1@example.com"),
+				dict(user="test2@example.com"),
+			],
+		)
 	).insert()
 
 	frappe.delete_doc_if_exists("Assignment Rule", f"For {TEST_DOCTYPE} 2")
 
 	# 2nd rule
 	frappe.get_doc(
-		name=f"For {TEST_DOCTYPE} 2",
-		doctype="Assignment Rule",
-		priority=1,
-		document_type=TEST_DOCTYPE,
-		assign_condition=assign[1],
-		unassign_condition="notify_on_login == 0",
-		rule="Round Robin",
-		assignment_days=days[1],
-		users=[dict(user="test3@example.com")],
+		dict(
+			name=f"For {TEST_DOCTYPE} 2",
+			doctype="Assignment Rule",
+			priority=1,
+			document_type=TEST_DOCTYPE,
+			assign_condition=assign[1],
+			unassign_condition="notify_on_login == 0",
+			rule="Round Robin",
+			assignment_days=days[1],
+			users=[dict(user="test3@example.com")],
+		)
 	).insert()
 
 	return assignment_rule

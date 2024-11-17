@@ -1,17 +1,8 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestListViewSettings(UnitTestCase):
-	"""
-	Unit tests for ListViewSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestListViewSettings(IntegrationTestCase):
+class TestListViewSettings(FrappeTestCase):
 	pass

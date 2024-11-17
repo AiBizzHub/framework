@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -42,8 +42,8 @@ class OnboardingStep(Document):
 		validate_action: DF.Check
 		value_to_validate: DF.Data | None
 		video_url: DF.Data | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def before_export(self, doc):
 		doc.is_complete = 0
 		doc.is_skipped = 0

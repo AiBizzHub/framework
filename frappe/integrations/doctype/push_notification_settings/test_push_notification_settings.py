@@ -1,18 +1,9 @@
-# Copyright (c) 2024, AiBizzApp Technologies and Contributors
+# Copyright (c) 2024, AiBizzHub, LLC and Contributors
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestPushNotificationSettings(UnitTestCase):
-	"""
-	Unit tests for PushNotificationSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPushNotificationSettings(IntegrationTestCase):
+class TestPushNotificationSettings(FrappeTestCase):
 	pass

@@ -1,24 +1,17 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 from unittest.mock import patch
 
 from ldap3.core.exceptions import LDAPException, LDAPInappropriateAuthenticationResult
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.error import _is_ldap_exception, guess_exception_source
 
-
-class UnitTestErrorLog(UnitTestCase):
-	"""
-	Unit tests for ErrorLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+# test_records = frappe.get_test_records('Error Log')
 
 
-class TestErrorLog(IntegrationTestCase):
+class TestErrorLog(FrappeTestCase):
 	def test_error_log(self):
 		"""let's do an error log on error log?"""
 		doc = frappe.new_doc("Error Log")
@@ -71,7 +64,7 @@ TEST_EXCEPTIONS = (
 )
 
 
-class TestExceptionSourceGuessing(IntegrationTestCase):
+class TestExceptionSourceGuessing(FrappeTestCase):
 	@patch.object(frappe, "get_installed_apps", return_value=["frappe", "erpnext", "3pa"])
 	def test_exc_source_guessing(self, _installed_apps):
 		for source, exc in TEST_EXCEPTIONS:

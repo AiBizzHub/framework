@@ -6,22 +6,15 @@ import unittest
 from typing import TYPE_CHECKING
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 if TYPE_CHECKING:
 	from frappe.printing.doctype.print_format.print_format import PrintFormat
 
-
-class UnitTestPrintFormat(UnitTestCase):
-	"""
-	Unit tests for PrintFormat.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
+test_records = frappe.get_test_records("Print Format")
 
 
-class TestPrintFormat(IntegrationTestCase):
+class TestPrintFormat(FrappeTestCase):
 	def test_print_user(self, style=None):
 		print_html = frappe.get_print("User", "Administrator", style=style)
 		self.assertTrue("<label>First Name: </label>" in print_html)
@@ -46,7 +39,7 @@ class TestPrintFormat(IntegrationTestCase):
 		os.access(frappe.get_app_path("frappe"), os.W_OK), "Only run if frappe app paths is writable"
 	)
 	def test_export_doc(self):
-		doc: "PrintFormat" = frappe.get_doc("Print Format", self.globalTestRecords["Print Format"][0]["name"])
+		doc: "PrintFormat" = frappe.get_doc("Print Format", test_records[0]["name"])
 
 		# this is only to make export_doc happy
 		doc.standard = "Yes"

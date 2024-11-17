@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -19,5 +19,4 @@ class AutoRepeatDay(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 	# end: auto-generated types
-
 	pass

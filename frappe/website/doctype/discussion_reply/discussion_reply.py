@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -17,8 +17,8 @@ class DiscussionReply(Document):
 
 		reply: DF.TextEditor | None
 		topic: DF.Link | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def on_update(self):
 		frappe.publish_realtime(
 			event="update_message",

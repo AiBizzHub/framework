@@ -1,16 +1,9 @@
 # Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Email Unsubscribe')
 
 
-class UnitTestEmailUnsubscribe(UnitTestCase):
-	"""
-	Unit tests for EmailUnsubscribe.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestEmailUnsubscribe(IntegrationTestCase):
+class TestEmailUnsubscribe(FrappeTestCase):
 	pass

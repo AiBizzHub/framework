@@ -1,19 +1,10 @@
-# Copyright (c) 2018, AiBizzApp Technologies and Contributors
+# Copyright (c) 2018, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestViewLog(UnitTestCase):
-	"""
-	Unit tests for ViewLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestViewLog(IntegrationTestCase):
+class TestViewLog(FrappeTestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
 

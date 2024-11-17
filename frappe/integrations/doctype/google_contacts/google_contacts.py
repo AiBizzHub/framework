@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 
@@ -29,8 +29,8 @@ class GoogleContacts(Document):
 		pull_from_google_contacts: DF.Check
 		push_to_google_contacts: DF.Check
 		refresh_token: DF.Password | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if not frappe.db.get_single_value("Google Settings", "enable"):
 			frappe.throw(_("Enable Google API in Google Settings."))
@@ -75,7 +75,9 @@ def authorize_access(g_contact, reauthorize=False, code=None):
 
 
 def get_google_contacts_object(g_contact):
-	"""Return an object of Google Calendar along with Google Calendar doc."""
+	"""
+	Returns an object of Google Calendar along with Google Calendar doc.
+	"""
 	account = frappe.get_doc("Google Contacts", g_contact)
 	oauth_obj = GoogleOAuth("contacts")
 

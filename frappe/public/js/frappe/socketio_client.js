@@ -214,5 +214,5 @@ class RealTimeClient {
 
 frappe.realtime = new RealTimeClient();
 
-// backward compatibility
+// backward compatbility
 frappe.socketio = frappe.realtime;

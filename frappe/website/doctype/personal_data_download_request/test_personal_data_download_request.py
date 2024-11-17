@@ -1,26 +1,17 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import json
 
 import frappe
 from frappe.contacts.doctype.contact.contact import get_contact_name
 from frappe.core.doctype.user.user import create_contact
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.website.doctype.personal_data_download_request.personal_data_download_request import (
 	get_user_data,
 )
 
 
-class UnitTestPersonalDataDownloadRequest(UnitTestCase):
-	"""
-	Unit tests for PersonalDataDownloadRequest.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestRequestPersonalData(IntegrationTestCase):
+class TestRequestPersonalData(FrappeTestCase):
 	def setUp(self):
 		create_user_if_not_exists(email="test_privacy@example.com")
 

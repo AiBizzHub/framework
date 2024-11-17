@@ -3,7 +3,7 @@
 
 import json
 import typing
-from urllib.parse import quote_plus
+from urllib.parse import quote
 
 import frappe
 import frappe.defaults
@@ -12,7 +12,7 @@ import frappe.utils
 from frappe import _, _dict
 from frappe.desk.form.document_follow import is_document_followed
 from frappe.model.utils.user_settings import get_user_settings
-from frappe.permissions import get_doc_permissions, has_permission
+from frappe.permissions import get_doc_permissions
 from frappe.utils.data import cstr
 
 if typing.TYPE_CHECKING:
@@ -38,7 +38,7 @@ def getdoc(doctype, name, user=None):
 
 	if not doc.has_permission("read"):
 		frappe.flags.error_message = _("Insufficient Permission for {0}").format(
-			frappe.bold(_(doctype) + " " + name)
+			frappe.bold(doctype + " " + name)
 		)
 		raise frappe.PermissionError(("read", doctype, name))
 
@@ -128,8 +128,6 @@ def get_docinfo(doc=None, doctype=None, name=None):
 			"is_document_followed": is_document_followed(doc.doctype, doc.name, frappe.session.user),
 			"tags": get_tags(doc.doctype, doc.name),
 			"document_email": get_document_email(doc.doctype, doc.name),
-			"error_log_exists": get_error_log_exists(doc),
-			"webhook_request_log_log_exists": get_webhook_request_log_exists(doc),
 		}
 	)
 
@@ -203,20 +201,6 @@ def get_versions(doc: "Document") -> list[dict]:
 	)
 
 
-def get_error_log_exists(doc: "Document") -> bool:
-	if has_permission("Error Log", print_logs=False):
-		return frappe.db.exists("Error Log", {"reference_doctype": doc.doctype, "reference_name": doc.name})
-	return False
-
-
-def get_webhook_request_log_exists(doc: "Document") -> bool:
-	if has_permission("Webhook Request Log", print_logs=False):
-		return frappe.db.exists(
-			"Webhook Request Log", {"reference_doctype": doc.doctype, "reference_document": doc.name}
-		)
-	return False
-
-
 @frappe.whitelist()
 def get_communications(doctype, name, start=0, limit=20):
 	from frappe.utils import cint
@@ -288,15 +272,15 @@ def _get_communications(doctype, name, start=0, limit=20):
 def get_communication_data(
 	doctype, name, start=0, limit=20, after=None, fields=None, group_by=None, as_dict=True
 ):
-	"""Return list of communications for a given document."""
+	"""Returns list of communications for a given document"""
 	if not fields:
 		fields = """
 			C.name, C.communication_type, C.communication_medium,
-			C.communication_date, C.content,
+			C.comment_type, C.communication_date, C.content,
 			C.sender, C.sender_full_name, C.cc, C.bcc,
 			C.creation AS creation, C.subject, C.delivery_status,
 			C._liked_by, C.reference_doctype, C.reference_name,
-			C.read_by_recipient, C.recipients
+			C.read_by_recipient, C.rating, C.recipients
 		"""
 
 	conditions = ""
@@ -315,7 +299,7 @@ def get_communication_data(
 	part1 = f"""
 		SELECT {fields}
 		FROM `tabCommunication` as C
-		WHERE C.communication_type IN ('Communication', 'Automated Message')
+		WHERE C.communication_type IN ('Communication', 'Feedback', 'Automated Message')
 		AND (C.reference_doctype = %(doctype)s AND C.reference_name = %(name)s)
 		{conditions}
 	"""
@@ -325,7 +309,7 @@ def get_communication_data(
 		SELECT {fields}
 		FROM `tabCommunication` as C
 		INNER JOIN `tabCommunication Link` ON C.name=`tabCommunication Link`.parent
-		WHERE C.communication_type IN ('Communication', 'Automated Message')
+		WHERE C.communication_type IN ('Communication', 'Feedback', 'Automated Message')
 		AND `tabCommunication Link`.link_doctype = %(doctype)s AND `tabCommunication Link`.link_name = %(name)s
 		{conditions}
 	"""
@@ -400,7 +384,7 @@ def get_document_email(doctype, name):
 		return None
 
 	email = email.split("@")
-	return f"{email[0]}+{quote_plus(doctype)}={quote_plus(cstr(name))}@{email[1]}"
+	return f"{email[0]}+{quote(doctype)}={quote(cstr(name))}@{email[1]}"
 
 
 def get_automatic_email_link():
@@ -437,17 +421,19 @@ def get_title_values_for_link_and_dynamic_link_fields(doc, link_fields=None):
 		link_fields = meta.get_link_fields() + meta.get_dynamic_link_fields()
 
 	for field in link_fields:
-		if not (doc_fieldvalue := getattr(doc, field.fieldname, None)):
+		link_docname = getattr(doc, field.fieldname, None)
+
+		if not link_docname:
 			continue
 
 		doctype = field.options if field.fieldtype == "Link" else doc.get(field.options)
 
 		meta = frappe.get_meta(doctype)
-		if not meta or not meta.title_field or not meta.show_title_field_in_link:
+		if not meta or not (meta.title_field and meta.show_title_field_in_link):
 			continue
 
-		link_title = frappe.db.get_value(doctype, doc_fieldvalue, meta.title_field, cache=True, order_by=None)
-		link_titles.update({doctype + "::" + doc_fieldvalue: link_title or doc_fieldvalue})
+		link_title = frappe.db.get_value(doctype, link_docname, meta.title_field, cache=True, order_by=None)
+		link_titles.update({doctype + "::" + link_docname: link_title})
 
 	return link_titles
 

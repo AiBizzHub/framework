@@ -9,15 +9,15 @@ from werkzeug.test import TestResponse
 
 import frappe
 from frappe.integrations.oauth2 import encode_params
-from frappe.tests import IntegrationTestCase
+from frappe.test_runner import make_test_records
 from frappe.tests.test_api import get_test_client, make_request, suppress_stdout
-from frappe.tests.utils import make_test_records
+from frappe.tests.utils import FrappeTestCase
 
 if TYPE_CHECKING:
 	from frappe.integrations.doctype.social_login_key.social_login_key import SocialLoginKey
 
 
-class AiBizzAppRequestTestCase(IntegrationTestCase):
+class FrappeRequestTestCase(FrappeTestCase):
 	@property
 	def sid(self) -> str:
 		if not getattr(self, "_sid", None):
@@ -51,7 +51,7 @@ class AiBizzAppRequestTestCase(IntegrationTestCase):
 		return make_request(target=self.TEST_CLIENT.delete, args=(path,), kwargs=kwargs, site=self.site)
 
 
-class TestOAuth20(AiBizzAppRequestTestCase):
+class TestOAuth20(FrappeRequestTestCase):
 	site = frappe.local.site
 
 	@classmethod
@@ -63,9 +63,9 @@ class TestOAuth20(AiBizzAppRequestTestCase):
 		cls.scope = "all openid"
 		cls.redirect_uri = "http://localhost"
 
-		# Set AiBizzApp server URL reqired for id_token generation
+		# Set Frappe server URL reqired for id_token generation
 		frappe_login_key: "SocialLoginKey" = frappe.new_doc("Social Login Key")
-		frappe_login_key.get_social_login_provider("AiBizzApp", initialize=True)
+		frappe_login_key.get_social_login_provider("Frappe", initialize=True)
 		frappe_login_key.base_url = frappe.utils.get_url()
 		frappe_login_key.enable_social_login = 0
 		frappe_login_key.insert(ignore_if_duplicate=True)
@@ -372,7 +372,7 @@ class TestOAuth20(AiBizzAppRequestTestCase):
 		)
 
 
-def check_valid_openid_response(access_token=None, client: "AiBizzAppRequestTestCase" = None):
+def check_valid_openid_response(access_token=None, client: "FrappeRequestTestCase" = None):
 	"""Return True for valid response."""
 	# Use token in header
 	headers = {}

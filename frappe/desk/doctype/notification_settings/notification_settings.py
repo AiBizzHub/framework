@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -29,8 +29,8 @@ class NotificationSettings(Document):
 		seen: DF.Check
 		subscribed_documents: DF.TableMultiSelect[NotificationSubscribedDocument]
 		user: DF.Link | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def on_update(self):
 		from frappe.desk.notifications import clear_notification_config
 
@@ -73,7 +73,7 @@ def create_notification_settings(user):
 		_doc.insert(ignore_permissions=True)
 
 
-def toggle_notifications(user: str, enable: bool = False, ignore_permissions=False):
+def toggle_notifications(user: str, enable: bool = False):
 	try:
 		settings = frappe.get_doc("Notification Settings", user)
 	except frappe.DoesNotExistError:
@@ -82,7 +82,7 @@ def toggle_notifications(user: str, enable: bool = False, ignore_permissions=Fal
 
 	if settings.enabled != enable:
 		settings.enabled = enable
-		settings.save(ignore_permissions=ignore_permissions)
+		settings.save()
 
 
 @frappe.whitelist()

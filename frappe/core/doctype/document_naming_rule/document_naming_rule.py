@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -27,8 +27,8 @@ class DocumentNamingRule(Document):
 		prefix: DF.Data
 		prefix_digits: DF.Int
 		priority: DF.Int
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		self.validate_fields_in_conditions()
 

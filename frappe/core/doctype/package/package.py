@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 import os
@@ -28,8 +28,8 @@ class Package(Document):
 		]
 		package_name: DF.Data
 		readme: DF.MarkdownEditor | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if not self.package_name:
 			self.package_name = self.name.lower().replace(" ", "-")

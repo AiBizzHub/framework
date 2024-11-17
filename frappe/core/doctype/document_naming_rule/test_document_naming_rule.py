@@ -1,26 +1,17 @@
-# Copyright (c) 2020, AiBizzApp Technologies and Contributors
+# Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestDocumentNamingRule(UnitTestCase):
-	"""
-	Unit tests for DocumentNamingRule.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestDocumentNamingRule(IntegrationTestCase):
+class TestDocumentNamingRule(FrappeTestCase):
 	def test_naming_rule_by_series(self):
 		naming_rule = frappe.get_doc(
-			doctype="Document Naming Rule", document_type="ToDo", prefix="test-todo-", prefix_digits=5
+			dict(doctype="Document Naming Rule", document_type="ToDo", prefix="test-todo-", prefix_digits=5)
 		).insert()
 
 		todo = frappe.get_doc(
-			doctype="ToDo", description="Is this my name " + frappe.generate_hash()
+			dict(doctype="ToDo", description="Is this my name " + frappe.generate_hash())
 		).insert()
 
 		self.assertEqual(todo.name, "test-todo-00001")
@@ -30,12 +21,14 @@ class TestDocumentNamingRule(IntegrationTestCase):
 
 	def test_naming_rule_by_condition(self):
 		naming_rule = frappe.get_doc(
-			doctype="Document Naming Rule",
-			document_type="ToDo",
-			prefix="test-high-",
-			prefix_digits=5,
-			priority=10,
-			conditions=[dict(field="priority", condition="=", value="High")],
+			dict(
+				doctype="Document Naming Rule",
+				document_type="ToDo",
+				prefix="test-high-",
+				prefix_digits=5,
+				priority=10,
+				conditions=[dict(field="priority", condition="=", value="High")],
+			)
 		).insert()
 
 		# another rule
@@ -53,15 +46,15 @@ class TestDocumentNamingRule(IntegrationTestCase):
 		naming_rule_2.insert()
 
 		todo = frappe.get_doc(
-			doctype="ToDo", priority="High", description="Is this my name " + frappe.generate_hash()
+			dict(doctype="ToDo", priority="High", description="Is this my name " + frappe.generate_hash())
 		).insert()
 
 		todo_1 = frappe.get_doc(
-			doctype="ToDo", priority="Medium", description="Is this my name " + frappe.generate_hash()
+			dict(doctype="ToDo", priority="Medium", description="Is this my name " + frappe.generate_hash())
 		).insert()
 
 		todo_2 = frappe.get_doc(
-			doctype="ToDo", priority="Low", description="Is this my name " + frappe.generate_hash()
+			dict(doctype="ToDo", priority="Low", description="Is this my name " + frappe.generate_hash())
 		).insert()
 
 		try:

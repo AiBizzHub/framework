@@ -1,23 +1,14 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import set_request
 from frappe.website.serve import get_response
 
-EXTRA_TEST_RECORD_DEPENDENCIES = ["Blog Post"]
+test_dependencies = ["Blog Post"]
 
 
-class UnitTestWebsiteRouteMeta(UnitTestCase):
-	"""
-	Unit tests for WebsiteRouteMeta.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestWebsiteRouteMeta(IntegrationTestCase):
+class TestWebsiteRouteMeta(FrappeTestCase):
 	def test_meta_tag_generation(self):
 		blogs = frappe.get_all(
 			"Blog Post", fields=["name", "route"], filters={"published": 1, "route": ("!=", "")}, limit=1

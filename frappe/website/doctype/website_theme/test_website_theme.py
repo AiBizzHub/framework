@@ -2,10 +2,9 @@
 # License: MIT. See LICENSE
 
 from contextlib import contextmanager
-from pathlib import Path
 
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.website.doctype.website_theme.website_theme import (
 	after_migrate,
 	get_active_theme,
@@ -25,26 +24,13 @@ def website_theme_fixture(**theme):
 	theme.delete()
 
 
-def get_theme_file(theme):
-	return Path(frappe.get_site_path("public", theme.theme_url[1:]))
-
-
-class UnitTestWebsiteTheme(UnitTestCase):
-	"""
-	Unit tests for WebsiteTheme.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestWebsiteTheme(IntegrationTestCase):
+class TestWebsiteTheme(FrappeTestCase):
 	def test_website_theme(self):
 		with website_theme_fixture(
 			google_font="Inter",
 			custom_scss="body { font-size: 16.5px; }",  # this will get minified!
 		) as theme:
-			theme_path = get_theme_file(theme)
+			theme_path = frappe.get_site_path("public", theme.theme_url[1:])
 			with open(theme_path) as theme_file:
 				css = theme_file.read()
 
@@ -57,17 +43,6 @@ class TestWebsiteTheme(IntegrationTestCase):
 	def test_imports_to_ignore(self):
 		with website_theme_fixture(ignored_apps=[{"app": "frappe"}]) as theme:
 			self.assertTrue('@import "frappe/public/scss/website"' not in theme.theme_scss)
-
-	def test_backup_files(self):
-		with website_theme_fixture(custom_scss="body { font-size: 16.5px; }") as theme:
-			first = get_theme_file(theme)
-			second = get_theme_file(theme.save())
-			self.assertTrue(first.exists() and second.exists())
-
-			third = get_theme_file(theme.save())
-			fourth = get_theme_file(theme.save())
-			self.assertFalse(first.exists())
-			self.assertTrue(second.exists() and third.exists() and fourth.exists())
 
 	def test_after_migrate_hook(self):
 		with website_theme_fixture(google_font="Inter") as theme:

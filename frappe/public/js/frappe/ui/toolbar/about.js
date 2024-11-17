@@ -9,28 +9,21 @@ frappe.ui.misc.about = function () {
 					<p>${__("Streamline Your Business With AiBizzHub")}</p>
 					<p><i class='fa fa-globe fa-fw'></i>
 						${__("Website")}:
-						<a href='https://aibizzapp.com' target='_blank'>https://aibizzapp.com</a></p>
-					<p><i class='fa fa-github fa-fw'></i>
-						${__("Source")}:
-						<a href='https://github.com/AiBizzHub' target='_blank'>https://github.com/AiBizzHub</a></p>
+						<a href='https://frappeframework.com' target='_blank'>https://frappeframework.com</a></p>
+					
 					<p><i class='fa fa-graduation-cap fa-fw'></i>
-						AiBizzApp School: <a href='https://aibizzapp.school' target='_blank'>https://aibizzapp.school</a></p>
+						AiBizzHub School: <a href='https://aibizzhub.school' target='_blank'>https://aibizzhub.school</a></p>
+
 					<p><i class='fa fa-linkedin fa-fw'></i>
-						Linkedin: <a href='https://linkedin.com/company/aibizzapp-erp-7a4773266' target='_blank'>https://linkedin.com/company/aibizzapp-erp-7a4773266</a></p>
+						Linkedin: <a href='https://linkedin.com/company/aibizzhub' target='_blank'>https://linkedin.com/company/aibizzhub</a></p>
+
 					<p><i class='fa fa-twitter fa-fw'></i>
-						Twitter: <a href='https://twitter.com/aibizzapp' target='_blank'>https://twitter.com/aibizzapp</a></p>
+						Twitter: <a href='https://twitter.com/aibizzhub' target='_blank'>https://twitter.com/aibizzhub</a></p>
 					<p><i class='fa fa-youtube fa-fw'></i>
-						YouTube: <a href='https://www.youtube.com/@aibizzapp' target='_blank'>https://www.youtube.com/@aibizzapp</a></p>
+						YouTube: <a href='https://www.youtube.com/@aibizzhub' target='_blank'>https://www.youtube.com/@aibizzhub</a></p>
 					<hr>
 					<h4>${__("Installed Apps")}</h4>
 					<div id='about-app-versions'>${__("Loading versions...")}</div>
-					<p>
-						<b>
-							<a href="/attribution" target="_blank" class="text-muted">
-								${__("Dependencies & Licenses")}
-							</a>
-						</b>
-					</p>
 					<hr>
 					<p class='text-muted'>${__("&copy; AiBizzHub, LLC and contributors")} </p>
 					</div>`,

@@ -1,10 +1,10 @@
 # Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 from frappe.search.full_text_search import FullTextSearch
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestFullTextSearch(IntegrationTestCase):
+class TestFullTextSearch(FrappeTestCase):
 	def setUp(self):
 		index = get_index()
 		index.build()
@@ -49,12 +49,12 @@ class TestFullTextSearch(IntegrationTestCase):
 
 	def test_update_index(self):
 		# Update existing index
-		self.index.update_index({"name": "sw/erpnext", "content": """AwesomeAiBizzApp"""})
+		self.index.update_index({"name": "sw/erpnext", "content": """AwesomeERPNext"""})
 
 		res = self.index.search("CommonSearchTerm")
 		self.assertTrue("sw/erpnext" not in res)
 
-		res = self.index.search("AwesomeAiBizzApp")
+		res = self.index.search("AwesomeERPNext")
 		self.assertEqual(res[0], "sw/erpnext")
 
 		# Update new doc
@@ -115,9 +115,9 @@ def get_documents():
 	docs.append(
 		{
 			"name": "sw/erpnext",
-			"content": """AiBizzApp is a free and open-source integrated Enterprise Resource Planning software developed by
+			"content": """ERPNext is a free and open-source integrated Enterprise Resource Planning software developed by
 			AiBizzHub, LLC and is built on MariaDB database system using a Python based server-side framework.
-			AiBizzApp is a generic ERP software used by manufacturers, distributors and services companies. CommonSearchTerm""",
+			ERPNext is a generic ERP software used by manufacturers, distributors and services companies. CommonSearchTerm""",
 		}
 	)
 

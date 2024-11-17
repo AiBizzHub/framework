@@ -1,4 +1,4 @@
-// Copyright (c) 2019, AiBizzApp Technologies and contributors
+// Copyright (c) 2019, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("Server Script", {
@@ -16,8 +16,7 @@ frappe.ui.form.on("Server Script", {
 			});
 		}
 
-		frappe
-			.call("frappe.core.doctype.server_script.server_script.get_autocompletion_items")
+		frm.call("get_autocompletion_items")
 			.then((r) => r.message)
 			.then((items) => {
 				frm.set_df_property("script", "autocompletions", items);
@@ -30,7 +29,7 @@ frappe.ui.form.on("Server Script", {
 		frappe.xcall("frappe.core.doctype.server_script.server_script.enabled").then((enabled) => {
 			if (enabled === false) {
 				let docs_link =
-					"https://aibizzapp.com/docs/user/en/desk/scripting/server-script";
+					"https://frappeframework.com/docs/user/en/desk/scripting/server-script";
 				let docs = `<a href=${docs_link}>${__("Official Documentation")}</a>`;
 
 				frm.dashboard.clear_comment();
@@ -63,40 +62,6 @@ if doc.allocated_to:
 		owner = doc.allocated_to,
 		description = doc.subject
 	)).insert()
-</code>
-</pre>
-
-<h5>Payment processing</h5>
-<p>Payment processing events have a special state. See the <a href="https://github.com/frappe/payments/blob/develop/payments/controllers/payment_controller.py">PaymentController in AiBizzApp Payments</a> for details.</p>
-<pre>
-	<code>
-# retreive payment session state
-ps = doc.flags.payment_session
-
-if ps.is_success:
-	if ps.changed: # could be an idempotent run
-		doc.set_as_paid()
-	# custom process return values
-	doc.flags.payment_session.result = {
-		"message": "Thank you for your payment",
-		"action": {"href": "https://shop.example.com", "label": "Return to shop"},
-	}
-if ps.is_pre_authorized:
-	if ps.changed: # could be an idempotent run
-		...
-if ps.is_processing:
-	if ps.changed: # could be an idempotent run
-		...
-if ps.is_declined:
-	if ps.changed: # could be an idempotent run
-		...
-</code>
-</pre>
-<p>The <i>On Payment Failed</i> (<code>on_payment_failed</code>) event only transports the error message which the controller implementation had extracted from the transaction.</p>
-<pre>
-	<code>
-msg = doc.flags.payment_failure_message
-doc.my_failure_message_field = msg
 </code>
 </pre>
 

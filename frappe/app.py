@@ -26,8 +26,8 @@ from frappe.auth import SAFE_HTTP_METHODS, UNSAFE_HTTP_METHODS, HTTPRequest, val
 from frappe.middlewares import StaticDataMiddleware
 from frappe.utils import CallbackManager, cint, get_site_name
 from frappe.utils.data import escape_html
+from frappe.utils.deprecations import deprecation_warning
 from frappe.utils.error import log_error_snapshot
-from frappe.website.page_renderers.error_page import ErrorPage
 from frappe.website.serve import get_response
 
 _site = None
@@ -104,12 +104,8 @@ def application(request: Request):
 			response = Response()
 
 		elif frappe.form_dict.cmd:
-			from frappe.deprecation_dumpster import deprecation_warning
-
 			deprecation_warning(
-				"unknown",
-				"v17",
-				f"{frappe.form_dict.cmd}: Sending `cmd` for RPC calls is deprecated, call REST API instead `/api/method/cmd`",
+				f"{frappe.form_dict.cmd}: Sending `cmd` for RPC calls is deprecated, call REST API instead `/api/method/cmd`"
 			)
 			frappe.handler.handle()
 			response = frappe.utils.response.build_response("json")
@@ -152,8 +148,8 @@ def application(request: Request):
 			# We can not handle exceptions safely here.
 			frappe.logger().error("Failed to run after request hook", exc_info=True)
 
-	log_request(request, response)
-	process_response(response)
+		log_request(request, response)
+		process_response(response)
 
 	return response
 
@@ -172,8 +168,8 @@ def init_request(request):
 
 	frappe.local.is_ajax = frappe.get_request_header("X-Requested-With") == "XMLHttpRequest"
 
-	site = _site or request.headers.get("X-AiBizzApp-Site-Name") or get_site_name(request.host)
-	frappe.init(site, sites_path=_sites_path, force=True)
+	site = _site or request.headers.get("X-Frappe-Site-Name") or get_site_name(request.host)
+	frappe.init(site=site, sites_path=_sites_path, force=True)
 
 	if not (frappe.local.conf and frappe.local.conf.db_name):
 		# site does not exist
@@ -241,24 +237,8 @@ def process_response(response):
 	if not response:
 		return
 
-	# cache control
-	# read: https://simonhearne.com/2022/caching-header-best-practices/
-	if frappe.local.response.can_cache:
-		response.headers.extend(
-			{
-				# default: 5m (proxy), 5m (client), 3h (allow stale resources for this long if upstream is down)
-				"Cache-Control": "public,s-maxage=300,max-age=300,stale-while-revalidate=10800",
-			}
-		)
-	else:
-		response.headers.extend(
-			{
-				"Cache-Control": "no-store,no-cache,must-revalidate,max-age=0",
-			}
-		)
-
-	# Set cookies, only if response is non-cacheable to avoid proxy cache invalidation
-	if hasattr(frappe.local, "cookie_manager") and not frappe.local.response.can_cache:
+	# set cookies
+	if hasattr(frappe.local, "cookie_manager"):
 		frappe.local.cookie_manager.flush_cookies(response=response)
 
 	# rate limiter headers
@@ -266,7 +246,7 @@ def process_response(response):
 		response.headers.extend(frappe.local.rate_limiter.headers())
 
 	if trace_id := frappe.monitor.get_trace_id():
-		response.headers.extend({"X-AiBizzApp-Request-Id": trace_id})
+		response.headers.extend({"X-Frappe-Request-Id": trace_id})
 
 	# CORS headers
 	if hasattr(frappe.local, "conf"):
@@ -332,12 +312,15 @@ def make_form_dict(request: Request):
 def handle_exception(e):
 	response = None
 	http_status_code = getattr(e, "http_status_code", 500)
+	return_as_message = False
 	accept_header = frappe.get_request_header("Accept") or ""
 	respond_as_json = (
 		frappe.get_request_header("Accept")
 		and (frappe.local.is_ajax or "application/json" in accept_header)
 		or (frappe.local.request.path.startswith("/api/") and not accept_header.startswith("text"))
 	)
+
+	allow_traceback = frappe.get_system_settings("allow_error_traceback") if frappe.db else False
 
 	if not frappe.session.user:
 		# If session creation fails then user won't be unset. This causes a lot of code that
@@ -361,33 +344,45 @@ def handle_exception(e):
 		http_status_code = 508
 
 	elif http_status_code == 401:
-		response = ErrorPage(
+		frappe.respond_as_web_page(
+			_("Session Expired"),
+			_("Your session has expired, please login again to continue."),
 			http_status_code=http_status_code,
-			title=_("Session Expired"),
-			message=_("Your session has expired, please login again to continue."),
-		).render()
+			indicator_color="red",
+		)
+		return_as_message = True
 
 	elif http_status_code == 403:
-		response = ErrorPage(
+		frappe.respond_as_web_page(
+			_("Not Permitted"),
+			_("You do not have enough permissions to complete the action"),
 			http_status_code=http_status_code,
-			title=_("Not Permitted"),
-			message=_("You do not have enough permissions to complete the action"),
-		).render()
+			indicator_color="red",
+		)
+		return_as_message = True
 
 	elif http_status_code == 404:
-		response = ErrorPage(
+		frappe.respond_as_web_page(
+			_("Not Found"),
+			_("The resource you are looking for is not available"),
 			http_status_code=http_status_code,
-			title=_("Not Found"),
-			message=_("The resource you are looking for is not available"),
-		).render()
+			indicator_color="red",
+		)
+		return_as_message = True
 
 	elif http_status_code == 429:
 		response = frappe.rate_limiter.respond()
 
 	else:
-		response = ErrorPage(
-			http_status_code=http_status_code, title=_("Server Error"), message=_("Uncaught Exception")
-		).render()
+		traceback = "<pre>" + escape_html(frappe.get_traceback()) + "</pre>"
+		# disable traceback in production if flag is set
+		if frappe.local.flags.disable_traceback or not allow_traceback and not frappe.local.dev_server:
+			traceback = ""
+
+		frappe.respond_as_web_page(
+			"Server Error", traceback, http_status_code=http_status_code, indicator_color="red", width=640
+		)
+		return_as_message = True
 
 	if e.__class__ == frappe.AuthenticationError:
 		if hasattr(frappe.local, "login_manager"):
@@ -395,6 +390,9 @@ def handle_exception(e):
 
 	if http_status_code >= 500:
 		log_error_snapshot(e)
+
+	if return_as_message:
+		response = get_response("message", http_status_code=http_status_code)
 
 	if frappe.conf.get("developer_mode") and not respond_as_json:
 		# don't fail silently for non-json response errors
@@ -430,7 +428,7 @@ if sentry_dsn := os.getenv("FRAPPE_SENTRY_DSN"):
 	from sentry_sdk.integrations.modules import ModulesIntegration
 	from sentry_sdk.integrations.wsgi import SentryWsgiMiddleware
 
-	from frappe.utils.sentry import AiBizzAppIntegration, before_send
+	from frappe.utils.sentry import FrappeIntegration, before_send
 
 	integrations = [
 		AtexitIntegration(),
@@ -444,7 +442,7 @@ if sentry_dsn := os.getenv("FRAPPE_SENTRY_DSN"):
 	kwargs = {}
 
 	if os.getenv("ENABLE_SENTRY_DB_MONITORING"):
-		integrations.append(AiBizzAppIntegration())
+		integrations.append(FrappeIntegration())
 		experiments["record_sql_params"] = True
 
 	if tracing_sample_rate := os.getenv("SENTRY_TRACING_SAMPLE_RATE"):

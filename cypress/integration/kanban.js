@@ -1,6 +1,6 @@
 context("Kanban Board", () => {
 	before(() => {
-		cy.login("frappe@example.com");
+		cy.login("aibizzapp@example.com");
 		cy.visit("/app");
 	});
 

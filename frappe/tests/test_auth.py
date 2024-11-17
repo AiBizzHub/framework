@@ -4,15 +4,13 @@ import datetime
 import time
 
 import requests
-from werkzeug.test import EnvironBuilder
-from werkzeug.wrappers import Request
 
 import frappe
 from frappe.auth import LoginAttemptTracker
-from frappe.frappeclient import AuthError, AiBizzAppClient
+from frappe.frappeclient import AuthError, FrappeClient
 from frappe.sessions import Session, get_expired_sessions, get_expiry_in_seconds
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.test_api import AiBizzAppAPITestCase
+from frappe.tests.test_api import FrappeAPITestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils import get_datetime, get_site_url, now
 from frappe.utils.data import add_to_date
 from frappe.www.login import _generate_temporary_login_link
@@ -21,7 +19,7 @@ from frappe.www.login import _generate_temporary_login_link
 def add_user(email, password, username=None, mobile_no=None):
 	first_name = email.split("@", 1)[0]
 	user = frappe.get_doc(
-		doctype="User", email=email, first_name=first_name, username=username, mobile_no=mobile_no
+		dict(doctype="User", email=email, first_name=first_name, username=username, mobile_no=mobile_no)
 	).insert()
 	user.new_password = password
 	user.simultaneous_sessions = 1
@@ -29,7 +27,7 @@ def add_user(email, password, username=None, mobile_no=None):
 	frappe.db.commit()
 
 
-class TestAuth(IntegrationTestCase):
+class TestAuth(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -64,12 +62,12 @@ class TestAuth(IntegrationTestCase):
 		self.set_system_settings("allow_login_using_user_name", 0)
 
 		# Login by both email and mobile should work
-		AiBizzAppClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
-		AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 
 		# login by username should fail
 		with self.assertRaises(AuthError):
-			AiBizzAppClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
+			FrappeClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
 
 	def test_allow_login_using_only_email(self):
 		self.set_system_settings("allow_login_using_mobile_number", 0)
@@ -77,14 +75,14 @@ class TestAuth(IntegrationTestCase):
 
 		# Login by mobile number should fail
 		with self.assertRaises(AuthError):
-			AiBizzAppClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
+			FrappeClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
 
 		# login by username should fail
 		with self.assertRaises(AuthError):
-			AiBizzAppClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
+			FrappeClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
 
 		# Login by email should work
-		AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 
 	def test_allow_login_using_username(self):
 		self.set_system_settings("allow_login_using_mobile_number", 0)
@@ -92,34 +90,34 @@ class TestAuth(IntegrationTestCase):
 
 		# Mobile login should fail
 		with self.assertRaises(AuthError):
-			AiBizzAppClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
+			FrappeClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
 
 		# Both email and username logins should work
-		AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
-		AiBizzAppClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
 
 	def test_allow_login_using_username_and_mobile(self):
 		self.set_system_settings("allow_login_using_mobile_number", 1)
 		self.set_system_settings("allow_login_using_user_name", 1)
 
 		# Both email and username and mobile logins should work
-		AiBizzAppClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
-		AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
-		AiBizzAppClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_mobile, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		FrappeClient(self.HOST_NAME, self.test_user_name, self.test_user_password)
 
 	def test_deny_multiple_login(self):
 		self.set_system_settings("deny_multiple_sessions", 1)
 		self.addCleanup(self.set_system_settings, "deny_multiple_sessions", 0)
 
-		first_login = AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		first_login = FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 		first_login.get_list("ToDo")
 
-		second_login = AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		second_login = FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 		second_login.get_list("ToDo")
 		with self.assertRaises(Exception):
 			first_login.get_list("ToDo")
 
-		third_login = AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		third_login = FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 		with self.assertRaises(Exception):
 			first_login.get_list("ToDo")
 		with self.assertRaises(Exception):
@@ -127,12 +125,12 @@ class TestAuth(IntegrationTestCase):
 		third_login.get_list("ToDo")
 
 	def test_disable_user_pass_login(self):
-		AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password).get_list("ToDo")
+		FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password).get_list("ToDo")
 		self.set_system_settings("disable_user_pass_login", 1)
 		self.addCleanup(self.set_system_settings, "disable_user_pass_login", 0)
 
 		with self.assertRaises(Exception):
-			AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password).get_list("ToDo")
+			FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password).get_list("ToDo")
 
 	def test_login_with_email_link(self):
 		user = self.test_user_email
@@ -160,47 +158,16 @@ class TestAuth(IntegrationTestCase):
 			self.fail("Rate limting not working")
 
 	def test_correct_cookie_expiry_set(self):
-		client = AiBizzAppClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
+		import pytz
+
+		client = FrappeClient(self.HOST_NAME, self.test_user_email, self.test_user_password)
 
 		expiry_time = next(x for x in client.session.cookies if x.name == "sid").expires
-		current_time = datetime.datetime.now(tz=datetime.UTC).timestamp()
+		current_time = datetime.datetime.now(tz=pytz.UTC).timestamp()
 		self.assertAlmostEqual(get_expiry_in_seconds(), expiry_time - current_time, delta=60 * 60)
 
 
-class TestAllowedReferrer(UnitTestCase):
-	def test_is_allowed_referrer(self):
-		def create_request(headers):
-			builder = EnvironBuilder(headers=headers)
-			env = builder.get_environ()
-			return Request(env)
-
-		# Test with valid referrer
-		frappe.cache.set_value("allowed_referrers", ["https://example.com"])
-		frappe.local.request = create_request({"Referer": "https://example.com/some/path"})
-		http_request = frappe.auth.HTTPRequest()
-		self.assertTrue(http_request.is_allowed_referrer())
-
-		# Test with invalid referrer
-		frappe.local.request = create_request({"Referer": "https://malicious.com"})
-		http_request = frappe.auth.HTTPRequest()
-		self.assertFalse(http_request.is_allowed_referrer())
-
-		# Test with valid origin
-		frappe.local.request = create_request({"Origin": "https://example.com"})
-		http_request = frappe.auth.HTTPRequest()
-		self.assertTrue(http_request.is_allowed_referrer())
-
-		# Test with invalid origin
-		frappe.local.request = create_request({"Origin": "https://malicious.com"})
-		http_request = frappe.auth.HTTPRequest()
-		self.assertFalse(http_request.is_allowed_referrer())
-
-		# Clean up
-		frappe.cache.delete_value("allowed_referrers")
-		frappe.local.request = None
-
-
-class TestLoginAttemptTracker(IntegrationTestCase):
+class TestLoginAttemptTracker(FrappeTestCase):
 	def test_account_lock(self):
 		"""Make sure that account locks after `n consecutive failures"""
 		tracker = LoginAttemptTracker("tester", max_consecutive_login_attempts=3, lock_interval=60)
@@ -239,7 +206,7 @@ class TestLoginAttemptTracker(IntegrationTestCase):
 		self.assertTrue(tracker.is_user_allowed())
 
 
-class TestSessionExpirty(AiBizzAppAPITestCase):
+class TestSessionExpirty(FrappeAPITestCase):
 	def test_session_expires(self):
 		sid = self.sid  # triggers login for test case login
 		s: Session = frappe.local.session_obj

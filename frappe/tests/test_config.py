@@ -1,11 +1,11 @@
 # Copyright (c) 2022, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase
-from frappe.utils.modules import get_modules_from_all_apps_for_user
+from frappe.config import get_modules_from_all_apps_for_user
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestConfig(IntegrationTestCase):
+class TestConfig(FrappeTestCase):
 	def test_get_modules(self):
 		frappe_modules = frappe.get_all("Module Def", filters={"app_name": "frappe"}, pluck="name")
 		all_modules_data = get_modules_from_all_apps_for_user()

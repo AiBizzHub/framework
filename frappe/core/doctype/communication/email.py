@@ -199,8 +199,7 @@ def _make(
 def validate_email(doc: "Communication") -> None:
 	"""Validate Email Addresses of Recipients and CC"""
 	if (
-		doc.communication_type != "Communication"
-		or doc.communication_medium != "Email"
+		not (doc.communication_type == "Communication" and doc.communication_medium == "Email")
 		or doc.flags.in_receive
 	):
 		return

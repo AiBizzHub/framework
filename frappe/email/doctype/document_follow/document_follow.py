@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -17,5 +17,4 @@ class DocumentFollow(Document):
 		ref_doctype: DF.Link
 		user: DF.Link
 	# end: auto-generated types
-
 	pass

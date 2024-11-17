@@ -41,11 +41,9 @@ class WebForm(WebsiteGenerator):
 		breadcrumbs: DF.Code | None
 		button_label: DF.Data | None
 		client_script: DF.Code | None
-		condition_json: DF.JSON | None
+		condition: DF.Code | None
 		custom_css: DF.Code | None
 		doc_type: DF.Link
-		hide_footer: DF.Check
-		hide_navbar: DF.Check
 		introduction_text: DF.TextEditor | None
 		is_standard: DF.Check
 		list_columns: DF.Table[WebFormListColumn]
@@ -69,7 +67,6 @@ class WebForm(WebsiteGenerator):
 		web_form_fields: DF.Table[WebFormField]
 		website_sidebar: DF.Link | None
 	# end: auto-generated types
-
 	website = frappe._dict(no_cache=1)
 
 	def validate(self):
@@ -111,7 +108,7 @@ class WebForm(WebsiteGenerator):
 			frappe.throw(_("Following fields are missing:") + "<br>" + "<br>".join(missing))
 
 	def reset_field_parent(self):
-		"""Convert link fields to select with names as options."""
+		"""Convert link fields to select with names as options"""
 		for df in self.web_form_fields:
 			df.parent = self.doc_type
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -24,5 +24,4 @@ class PortalMenuItem(Document):
 		target: DF.Data | None
 		title: DF.Data
 	# end: auto-generated types
-
 	pass

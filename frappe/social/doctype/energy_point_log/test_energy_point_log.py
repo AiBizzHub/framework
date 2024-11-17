@@ -1,25 +1,16 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
 from frappe.desk.form.assign_to import add as assign_to
 from frappe.desk.page.user_profile.user_profile import get_energy_points_heatmap_data
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 from frappe.utils.testutils import add_custom_field, clear_custom_fields
 
 from .energy_point_log import create_review_points_log, review
 from .energy_point_log import get_energy_points as _get_energy_points
 
 
-class UnitTestEnergyPointLog(UnitTestCase):
-	"""
-	Unit tests for EnergyPointLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestEnergyPointLog(IntegrationTestCase):
+class TestEnergyPointLog(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
@@ -374,7 +365,7 @@ def create_a_todo(description=None):
 
 
 def get_points(user, point_type="energy_points"):
-	return _get_energy_points(user).get(point_type, 0)
+	return _get_energy_points(user).get(point_type) or 0
 
 
 def assign_users_to_todo(todo_name, users):

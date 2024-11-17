@@ -1,23 +1,14 @@
-# Copyright (c) 2019, AiBizzApp Technologies and Contributors
+# Copyright (c) 2019, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
 from frappe.core.doctype.data_import.exporter import Exporter
 from frappe.core.doctype.data_import.test_importer import create_doctype_if_not_exists
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 doctype_name = "DocType for Export"
 
 
-class UnitTestDataImport(UnitTestCase):
-	"""
-	Unit tests for DataImport.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestExporter(IntegrationTestCase):
+class TestExporter(FrappeTestCase):
 	def setUp(self):
 		create_doctype_if_not_exists(doctype_name)
 

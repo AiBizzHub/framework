@@ -90,7 +90,7 @@ export default class GridRow {
 		this.wrapper
 			.find(".grid-row-check")
 			.prop("checked", this.doc ? !!this.doc.__checked : false);
-		this.grid.debounced_refresh_remove_rows_button();
+		this.grid.refresh_remove_rows_button();
 	}
 	remove() {
 		var me = this;
@@ -1152,8 +1152,8 @@ export default class GridRow {
 		let ignore_fieldtypes = ["Text", "Small Text", "Code", "Text Editor", "HTML Editor"];
 		if (field.$input) {
 			field.$input.on("keydown", function (e) {
-				var { ESCAPE, TAB, UP: UP_ARROW, DOWN: DOWN_ARROW } = frappe.ui.keyCode;
-				if (![TAB, UP_ARROW, DOWN_ARROW, ESCAPE].includes(e.which)) {
+				var { TAB, UP: UP_ARROW, DOWN: DOWN_ARROW } = frappe.ui.keyCode;
+				if (![TAB, UP_ARROW, DOWN_ARROW].includes(e.which)) {
 					return;
 				}
 
@@ -1187,14 +1187,6 @@ export default class GridRow {
 					}
 					return true;
 				};
-
-				// ESC
-				if (e.which === ESCAPE && !e.shiftKey) {
-					if (me.doc.__unedited) {
-						me.grid.grid_rows[me.doc.idx - 1].remove();
-					}
-					return false;
-				}
 
 				// TAB
 				if (e.which === TAB && !e.shiftKey) {
@@ -1374,20 +1366,16 @@ export default class GridRow {
 		if (cur_frm) cur_frm.cur_grid = null;
 		this.wrapper.removeClass("grid-row-open");
 	}
-	has_prev() {
-		return this.doc.idx > 1;
-	}
 	open_prev() {
 		if (!this.doc) return;
 		this.open_row_at_index(this.doc.idx - 2);
 	}
-	has_next() {
-		return this.doc.idx < this.grid.data.length;
-	}
 	open_next() {
 		if (!this.doc) return;
 
-		this.open_row_at_index(this.doc.idx);
+		if (!this.open_row_at_index(this.doc.idx)) {
+			this.grid.add_new_row(null, null, true);
+		}
 	}
 	open_row_at_index(row_index) {
 		if (!this.grid.data[row_index]) return;

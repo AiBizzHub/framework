@@ -137,7 +137,7 @@ frappe.ui.form.on("Workflow", {
 		};
 
 		frappe.warn(
-			__("Workflow States Don't Exist"),
+			__("Worflow States Don't Exist"),
 			message_html,
 			proceed_action,
 			__("Save Anyway")

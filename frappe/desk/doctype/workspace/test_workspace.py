@@ -1,19 +1,10 @@
-# Copyright (c) 2020, AiBizzApp Technologies and Contributors
+# Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestWorkspace(UnitTestCase):
-	"""
-	Unit tests for Workspace.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestWorkspace(IntegrationTestCase):
+class TestWorkspace(FrappeTestCase):
 	def setUp(self):
 		create_module("Test Module")
 

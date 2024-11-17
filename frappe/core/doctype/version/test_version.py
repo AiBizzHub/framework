@@ -4,20 +4,11 @@ import copy
 
 import frappe
 from frappe.core.doctype.version.version import get_diff
-from frappe.tests import IntegrationTestCase, UnitTestCase
-from frappe.tests.utils import make_test_objects
+from frappe.test_runner import make_test_objects
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestVersion(UnitTestCase):
-	"""
-	Unit tests for Version.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestVersion(IntegrationTestCase):
+class TestVersion(FrappeTestCase):
 	def test_get_diff(self):
 		frappe.set_user("Administrator")
 		test_records = make_test_objects("Event", reset=True)

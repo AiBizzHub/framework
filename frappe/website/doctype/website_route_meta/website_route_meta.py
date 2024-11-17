@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -15,8 +15,8 @@ class WebsiteRouteMeta(Document):
 		from frappe.website.doctype.website_meta_tag.website_meta_tag import WebsiteMetaTag
 
 		meta_tags: DF.Table[WebsiteMetaTag]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def autoname(self):
 		if self.name and self.name.startswith("/"):
 			self.name = self.name[1:]

@@ -47,7 +47,7 @@ def get_context(context):
 	context["disable_user_pass_login"] = cint(frappe.get_system_settings("disable_user_pass_login"))
 	context["logo"] = get_app_logo()
 	context["app_name"] = (
-		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or _("AiBizzApp")
+		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or _("Frappe")
 	)
 
 	signup_form_template = frappe.get_hooks("signup_form_template")
@@ -69,9 +69,7 @@ def get_context(context):
 	)
 
 	for provider in providers:
-		client_secret = get_decrypted_password(
-			"Social Login Key", provider.name, "client_secret", raise_exception=False
-		)
+		client_secret = get_decrypted_password("Social Login Key", provider.name, "client_secret")
 		if not client_secret:
 			continue
 
@@ -138,7 +136,7 @@ def send_login_link(email: str):
 	link = _generate_temporary_login_link(email, expiry)
 
 	app_name = (
-		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or _("AiBizzApp")
+		frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or _("Frappe")
 	)
 
 	subject = _("Login To {0}").format(app_name)

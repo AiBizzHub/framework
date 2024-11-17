@@ -1,9 +1,9 @@
 # Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-# Author - Shivam Mishra <shivam@aibizzapp.com>
+# Author - Shivam Mishra <shivam@frappe.io>
 
 from functools import wraps
-from json import JSONDecodeError, dumps, loads
+from json import dumps, loads
 
 import frappe
 from frappe import DoesNotExistError, ValidationError, _, _dict
@@ -68,7 +68,7 @@ class Workspace:
 		)
 
 	def is_permitted(self):
-		"""Return true if `Has Role` is not set or the user is allowed."""
+		"""Returns true if Has Role is not set or the user is allowed."""
 		from frappe.utils import has_common
 
 		allowed = [d.role for d in self.doc.roles]
@@ -338,7 +338,6 @@ class Workspace:
 		for doc in onboarding_doc.get_steps():
 			step = doc.as_dict().copy()
 			step.label = _(doc.title)
-			step.description = _(doc.description)
 			if step.action == "Create Entry":
 				step.is_submittable = frappe.db.get_value(
 					"DocType", step.reference_document, "is_submittable", cache=True
@@ -385,12 +384,13 @@ class Workspace:
 @frappe.whitelist()
 @frappe.read_only()
 def get_desktop_page(page):
-	"""Apply permissions, customizations and return the configuration for a page on desk.
+	"""Applies permissions, customizations and returns the configruration for a page
+	on desk.
 
 	Args:
 	        page (json): page data
 
-	Return:
+	Returns:
 	        dict: dictionary of cards, charts and shortcuts to be displayed on website
 	"""
 	try:
@@ -413,9 +413,6 @@ def get_desktop_page(page):
 @frappe.whitelist()
 def get_workspace_sidebar_items():
 	"""Get list of sidebar items for desk"""
-
-	from frappe.modules.utils import get_module_app
-
 	has_access = "Workspace Manager" in frappe.get_roles()
 
 	# don't get domain restricted pages
@@ -446,25 +443,12 @@ def get_workspace_sidebar_items():
 		"icon",
 		"indicator_color",
 		"is_hidden",
-		"app",
-		"type",
-		"link_type",
-		"link_to",
-		"external_link",
 	]
 	all_pages = frappe.get_all(
 		"Workspace", fields=fields, filters=filters, order_by=order_by, ignore_permissions=True
 	)
 	pages = []
 	private_pages = []
-
-	# get additional settings from Work Settings
-	try:
-		workspace_visibilty = loads(
-			frappe.db.get_single_value("Workspace Settings", "workspace_visibility_json") or "{}"
-		)
-	except JSONDecodeError:
-		workspace_visibilty = {}
 
 	# Filter Page based on Permission
 	for page in all_pages:
@@ -476,35 +460,16 @@ def get_workspace_sidebar_items():
 				elif page.for_user == frappe.session.user:
 					private_pages.append(page)
 				page["label"] = _(page.get("name"))
-
-			if page["name"] in workspace_visibilty:
-				page["visibility"] = workspace_visibilty[page["name"]]
-
-			if not page["app"] and page["module"]:
-				page["app"] = frappe.db.get_value("Module Def", page["module"], "app_name") or get_module_app(
-					page["module"]
-				)
-			if page["link_type"] == "Report":
-				report_type, ref_doctype = frappe.db.get_value(
-					"Report", page["link_to"], ["report_type", "ref_doctype"]
-				)
-				page["report"] = {
-					"report_type": report_type,
-					"ref_doctype": ref_doctype,
-				}
-
 		except frappe.PermissionError:
 			pass
 	if private_pages:
 		pages.extend(private_pages)
 
 	if len(pages) == 0:
-		pages.append(next((x for x in all_pages if x["title"] == "Welcome Workspace"), None))
+		pages = [frappe.get_doc("Workspace", "Welcome Workspace").as_dict()]
+		pages[0]["label"] = _("Welcome Workspace")
 
 	return {
-		"workspace_setup_completed": frappe.db.get_single_value(
-			"Workspace Settings", "workspace_setup_completed"
-		),
 		"pages": pages,
 		"has_access": has_access,
 		"has_create_access": frappe.has_permission(doctype="Workspace", ptype="create"),
@@ -546,7 +511,7 @@ def get_custom_doctype_list(module):
 
 
 def get_custom_report_list(module):
-	"""Return list on new style reports for modules."""
+	"""Returns list on new style reports for modules."""
 	reports = frappe.get_all(
 		"Report",
 		fields=["name", "ref_doctype", "report_type"],
@@ -605,7 +570,7 @@ def save_new_widget(doc, page, blocks, new_widgets):
 		exception: {e}
 		"""
 		doc.log_error("Could not save customization", log)
-		raise
+		return False
 
 	return True
 
@@ -656,14 +621,14 @@ def new_widget(config, doctype, parentfield):
 
 
 def prepare_widget(config, doctype, parentfield):
-	"""Create widget child table entries with parent details.
+	"""Create widget child table entries with parent details
 
 	Args:
 	        config (dict): Dictionary containing widget config
 	        doctype (string): Doctype name of the child table
 	        parentfield (string): Parent field for the child table
 
-	Return:
+	Returns:
 	        TYPE: List of Document objects
 	"""
 	if not config:

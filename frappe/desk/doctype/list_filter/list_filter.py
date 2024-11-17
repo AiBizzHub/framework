@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 from frappe.model.document import Document
@@ -18,5 +18,4 @@ class ListFilter(Document):
 		for_user: DF.Link | None
 		reference_doctype: DF.Link | None
 	# end: auto-generated types
-
 	pass

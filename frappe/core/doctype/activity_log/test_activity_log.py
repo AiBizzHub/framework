@@ -1,22 +1,13 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import time
 
 import frappe
 from frappe.auth import CookieManager, LoginManager
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestActivityLog(UnitTestCase):
-	"""
-	Unit tests for ActivityLog.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestActivityLog(IntegrationTestCase):
+class TestActivityLog(FrappeTestCase):
 	def setUp(self) -> None:
 		frappe.set_user("Administrator")
 

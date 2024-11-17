@@ -1,4 +1,4 @@
-# Copyright (c) 2013, AiBizzApp and contributors
+# Copyright (c) 2013, Frappe and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -42,13 +42,14 @@ class HelpArticle(WebsiteGenerator):
 
 	def on_update(self):
 		self.update_category()
-
-	def clear_cache(self):
-		clear_knowledge_base_cache()
-		return super().clear_cache()
+		clear_cache()
 
 	def update_category(self):
-		cnt = frappe.db.count("Help Article", filters={"category": self.category, "published": 1})
+		cnt = frappe.db.sql(
+			"""select count(*) from `tabHelp Article`
+			where category=%s and ifnull(published,0)=1""",
+			self.category,
+		)[0][0]
 		cat = frappe.get_doc("Help Category", self.category)
 		cat.help_articles = cnt
 		cat.save()
@@ -107,7 +108,7 @@ def get_sidebar_items():
 			from
 				`tabHelp Category`
 			where
-				published = 1 and help_articles > 0
+				ifnull(published,0)=1 and help_articles > 0
 			order by
 				help_articles desc""",
 			as_dict=True,
@@ -116,7 +117,15 @@ def get_sidebar_items():
 	return frappe.cache.get_value("knowledge_base:category_sidebar", _get)
 
 
-def clear_knowledge_base_cache():
+def clear_cache():
+	clear_website_cache()
+
+	from frappe.website.utils import clear_cache
+
+	clear_cache()
+
+
+def clear_website_cache(path=None):
 	frappe.cache.delete_value("knowledge_base:category_sidebar")
 	frappe.cache.delete_value("knowledge_base:faq")
 

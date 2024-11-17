@@ -28,7 +28,9 @@ class Identicon:
 		self.hash = self.digest(str_)
 
 	def digest(self, str_):
-		"""Return an MD5 numeric hash."""
+		"""
+		Returns a md5 numeric hash
+		"""
 		return int(md5(str_.encode("utf-8"), usedforsecurity=False).hexdigest(), 16)
 
 	def calculate(self):

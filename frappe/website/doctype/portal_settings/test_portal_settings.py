@@ -1,17 +1,8 @@
-# Copyright (c) 2020, AiBizzApp Technologies and Contributors
+# Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestPortalSettings(UnitTestCase):
-	"""
-	Unit tests for PortalSettings.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPortalSettings(IntegrationTestCase):
+class TestPortalSettings(FrappeTestCase):
 	pass

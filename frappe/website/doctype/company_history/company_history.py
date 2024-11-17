@@ -22,5 +22,4 @@ class CompanyHistory(Document):
 		parenttype: DF.Data
 		year: DF.Data | None
 	# end: auto-generated types
-
 	pass

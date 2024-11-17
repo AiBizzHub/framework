@@ -217,7 +217,7 @@ export default class QuickListWidget extends Widget {
 					doctype: this.document_type,
 					fields: fields,
 					filters: quick_list_filter,
-					order_by: "creation desc",
+					order_by: "modified desc",
 					start: 0,
 					page_length: 4,
 				},

@@ -18,13 +18,13 @@ let properties = computed(() => {
 	if (store.workflow.selected && "action" in store.workflow.selected.data) {
 		title.value = __("Transition Properties");
 		return store.transitionfields.filter((df) =>
-			["action", "allowed", "allow_self_approval", "condition"].includes(df.fieldname)
+			in_list(["action", "allowed", "allow_self_approval", "condition"], df.fieldname)
 		);
 	} else if (store.workflow.selected && "state" in store.workflow.selected.data) {
 		title.value = __("State Properties");
 		let allow_edit = store.statefields.find((df) => df.fieldname == "allow_edit");
 		store.statefields = store.statefields.filter(
-			(df) => !["allow_edit", "workflow_builder_id"].includes(df.fieldname)
+			(df) => !in_list(["allow_edit", "workflow_builder_id"], df.fieldname)
 		);
 		store.statefields.splice(2, 0, allow_edit);
 
@@ -41,7 +41,7 @@ let properties = computed(() => {
 	}
 	title.value = __("Workflow Details");
 	return store.workflowfields.filter(
-		(df) => !["states", "transitions", "workflow_data", "workflow_name"].includes(df.fieldname)
+		(df) => !in_list(["states", "transitions", "workflow_data", "workflow_name"], df.fieldname)
 	);
 });
 </script>

@@ -35,7 +35,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 				this.add_totals_row = this.report_doc.json.add_totals_row;
 				this.page_title = __(this.report_name);
 				this.page_length = this.report_doc.json.page_length || 20;
-				this.order_by = this.report_doc.json.order_by || "creation desc";
+				this.order_by = this.report_doc.json.order_by || "modified desc";
 				this.chart_args = this.report_doc.json.chart_args;
 			});
 		} else {
@@ -49,7 +49,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 		this.setup_columns();
 		super.setup_new_doc_event();
 		this.setup_events();
-		this.page.main.parent().addClass("report-view");
+		this.page.main.addClass("report-view");
 	}
 
 	setup_events() {
@@ -98,7 +98,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 		);
 		this.$paging_area
 			.find(".level-left")
-			.after(`<span class="comparison-message text-extra-muted">${message}</span>`);
+			.after(`<span class="comparison-message text-muted">${message}</span>`);
 	}
 
 	setup_sort_selector() {
@@ -111,9 +111,10 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 
 		//Setup groupby for reports
 		this.group_by_control = new frappe.ui.GroupBy(this);
-		if (this.report_doc?.json?.group_by) {
+		if (this.report_doc && this.report_doc.json.group_by) {
 			this.group_by_control.apply_settings(this.report_doc.json.group_by);
-		} else if (this.view_user_settings?.group_by) {
+		}
+		if (this.view_user_settings && this.view_user_settings.group_by) {
 			this.group_by_control.apply_settings(this.view_user_settings.group_by);
 		}
 	}
@@ -671,38 +672,8 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 		return control;
 	}
 
-	evaluate_read_only_depends_on(expression, data) {
-		let out = null;
-		if (typeof expression === "boolean") {
-			out = expression;
-		} else if (expression.substr(0, 5) == "eval:") {
-			try {
-				out = frappe.utils.eval(expression.substr(5), { doc: data });
-				if (parent && parent.istable && expression.includes("is_submittable")) {
-					out = true;
-				}
-			} catch (e) {
-				frappe.throw(__('Invalid "depends_on" expression'));
-			}
-		} else if (expression.substr(0, 3) == "fn:" && this.frm) {
-			out = this.frm.script_manager.trigger(
-				expression.substr(3),
-				this.doctype,
-				this.docname
-			);
-		} else {
-			var value = data[expression];
-			if ($.isArray(value)) {
-				out = !!value.length;
-			} else {
-				out = !!value;
-			}
-		}
-		return out;
-	}
-
 	is_editable(df, data) {
-		return (
+		if (
 			df &&
 			frappe.model.can_write(this.doctype) &&
 			// not a submitted doc or field is allowed to edit after submit
@@ -713,10 +684,10 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 			!df.is_virtual &&
 			!df.hidden &&
 			// not a standard field i.e., owner, modified_by, etc.
-			frappe.model.is_non_std_field(df.fieldname) &&
-			df.read_only_depends_on &&
-			!this.evaluate_read_only_depends_on(df.read_only_depends_on, data)
-		);
+			frappe.model.is_non_std_field(df.fieldname)
+		)
+			return true;
+		return false;
 	}
 
 	get_data(values) {
@@ -1220,6 +1191,7 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 				// child table field
 				const cdt_field = (f) => `${col.docfield.parent}:${f}`;
 				const name = d[cdt_field("name")];
+
 				return {
 					name: name,
 					doctype: col.docfield.parent,
@@ -1622,7 +1594,6 @@ frappe.views.ReportView = class ReportView extends frappe.views.ListView {
 							if (data.file_format == "CSV") {
 								args.csv_delimiter = data.csv_delimiter;
 								args.csv_quoting = data.csv_quoting;
-								args.csv_decimal_sep = data.csv_decimal_sep;
 							}
 
 							if (this.add_totals_row) {

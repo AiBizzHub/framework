@@ -1,4 +1,4 @@
-// Copyright (c) 2019, AiBizzApp Technologies and contributors
+// Copyright (c) 2019, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.provide("frappe.dashboards.chart_sources");
@@ -397,7 +397,7 @@ frappe.ui.form.on("Dashboard Chart", {
 						}
 					}
 				},
-				primary_action_label: __("Set"),
+				primary_action_label: "Set",
 			});
 			frappe.dashboards.filters_dialog = dialog;
 
@@ -484,7 +484,7 @@ frappe.ui.form.on("Dashboard Chart", {
 					}
 					frm.trigger("set_dynamic_filters_in_table");
 				},
-				primary_action_label: __("Set"),
+				primary_action_label: "Set",
 			});
 
 			dialog.show();

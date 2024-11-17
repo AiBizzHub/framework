@@ -1,17 +1,10 @@
-# Copyright (c) 2015, AiBizzApp Technologies and Contributors
+# Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
+
+# test_records = frappe.get_test_records('Integration Request')
 
 
-class UnitTestIntegrationRequest(UnitTestCase):
-	"""
-	Unit tests for IntegrationRequest.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestIntegrationRequest(IntegrationTestCase):
+class TestIntegrationRequest(FrappeTestCase):
 	pass

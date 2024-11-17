@@ -1,18 +1,9 @@
-# Copyright (c) 2023, AiBizzApp Technologies and Contributors
+# Copyright (c) 2023, AiBizzHub, LLC and Contributors
 # See license.txt
 
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestRecorderQuery(UnitTestCase):
-	"""
-	Unit tests for RecorderQuery.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestRecorderQuery(IntegrationTestCase):
+class TestRecorderQuery(FrappeTestCase):
 	pass

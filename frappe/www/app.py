@@ -22,10 +22,10 @@ def get_context(context):
 		frappe.response["status_code"] = 403
 		frappe.msgprint(_("Log in to access this page."))
 		frappe.redirect(f"/login?{urlencode({'redirect-to': frappe.request.path})}")
-
 	elif frappe.db.get_value("User", frappe.session.user, "user_type", order_by=None) == "Website User":
 		frappe.throw(_("You are not permitted to access this page."), frappe.PermissionError)
 
+	hooks = frappe.get_hooks()
 	try:
 		boot = frappe.sessions.get()
 	except Exception as e:
@@ -45,21 +45,21 @@ def get_context(context):
 	boot_json = CLOSING_SCRIPT_TAG_PATTERN.sub("", boot_json)
 	boot_json = json.dumps(boot_json)
 
-	hooks = frappe.get_hooks()
-	app_include_js = hooks.get("app_include_js", []) + frappe.conf.get("app_include_js", [])
-	app_include_css = hooks.get("app_include_css", []) + frappe.conf.get("app_include_css", [])
-	app_include_icons = hooks.get("app_include_icons", [])
+	include_js = hooks.get("app_include_js", []) + frappe.conf.get("app_include_js", [])
+	include_css = hooks.get("app_include_css", []) + frappe.conf.get("app_include_css", [])
+	include_icons = hooks.get("app_include_icons", [])
+	frappe.local.preload_assets["icons"].extend(include_icons)
 
 	if frappe.get_system_settings("enable_telemetry") and os.getenv("FRAPPE_SENTRY_DSN"):
-		app_include_js.append("sentry.bundle.js")
+		include_js.append("sentry.bundle.js")
 
 	context.update(
 		{
 			"no_cache": 1,
 			"build_version": frappe.utils.get_build_version(),
-			"app_include_js": app_include_js,
-			"app_include_css": app_include_css,
-			"app_include_icons": app_include_icons,
+			"include_js": include_js,
+			"include_css": include_css,
+			"include_icons": include_icons,
 			"layout_direction": "rtl" if is_rtl() else "ltr",
 			"lang": frappe.local.lang,
 			"sounds": hooks["sounds"],
@@ -69,7 +69,7 @@ def get_context(context):
 			"google_analytics_id": frappe.conf.get("google_analytics_id"),
 			"google_analytics_anonymize_ip": frappe.conf.get("google_analytics_anonymize_ip"),
 			"app_name": (
-				frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or "AiBizzApp"
+				frappe.get_website_settings("app_name") or frappe.get_system_settings("app_name") or "Frappe"
 			),
 		}
 	)

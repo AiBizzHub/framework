@@ -1,16 +1,7 @@
-# Copyright (c) 2017, AiBizzApp Technologies and Contributors
+# Copyright (c) 2017, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestDomain(UnitTestCase):
-	"""
-	Unit tests for Domain.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestDomain(IntegrationTestCase):
+class TestDomain(FrappeTestCase):
 	pass

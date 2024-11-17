@@ -3,11 +3,10 @@ from functools import lru_cache, wraps
 from inspect import _empty, isclass, signature
 from types import EllipsisType
 from typing import ForwardRef, TypeVar, Union
-from unittest import mock
 
 from pydantic import ConfigDict
 
-from frappe.exceptions import AiBizzAppTypeError
+from frappe.exceptions import FrappeTypeError
 
 SLACK_DICT = {
 	bool: (int, bool, float),
@@ -15,7 +14,7 @@ SLACK_DICT = {
 T = TypeVar("T")
 
 
-AiBizzAppPydanticConfig = ConfigDict(arbitrary_types_allowed=True)
+FrappePydanticConfig = ConfigDict(arbitrary_types_allowed=True)
 
 
 def validate_argument_types(func: Callable, apply_condition: Callable = lambda: True):
@@ -61,7 +60,7 @@ def raise_type_error(
 	and the actual type of the value passed.
 
 	"""
-	raise AiBizzAppTypeError(
+	raise FrappeTypeError(
 		f"Argument '{arg_name}' should be of type '{qualified_name(arg_type)}' but got "
 		f"'{qualified_name(arg_value)}' instead."
 	) from current_exception
@@ -71,15 +70,15 @@ def raise_type_error(
 def TypeAdapter(type_):
 	from pydantic import TypeAdapter as PyTypeAdapter
 
-	return PyTypeAdapter(type_, config=AiBizzAppPydanticConfig)
+	return PyTypeAdapter(type_, config=FrappePydanticConfig)
 
 
 def transform_parameter_types(func: Callable, args: tuple, kwargs: dict):
 	"""
 	Validate the types of the arguments passed to a function with the type annotations
 	defined on the function.
-	"""
 
+	"""
 	if not (args or kwargs) or not func.__annotations__:
 		return args, kwargs
 
@@ -118,11 +117,8 @@ def transform_parameter_types(func: Callable, args: tuple, kwargs: dict):
 			continue
 		elif any(isinstance(x, ForwardRef | str) for x in getattr(current_arg_type, "__args__", [])):
 			continue
-		# ignore unittest.mock objects
-		elif isinstance(current_arg_value, mock.Mock):
-			continue
 
-		# allow slack for AiBizzApp types
+		# allow slack for Frappe types
 		if current_arg_type in SLACK_DICT:
 			current_arg_type = SLACK_DICT[current_arg_type]
 

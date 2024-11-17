@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -14,7 +14,6 @@ from frappe.core.utils import html2text
 from frappe.database.database import savepoint
 from frappe.email.doctype.email_account.email_account import EmailAccount
 from frappe.email.email_body import add_attachment, get_email, get_formatted_html
-from frappe.email.frappemail import AiBizzAppMail
 from frappe.email.queue import get_unsubcribed_url, get_unsubscribe_message
 from frappe.email.smtp import SMTPServer
 from frappe.model.document import Document
@@ -32,6 +31,7 @@ from frappe.utils import (
 	sbool,
 	split_emails,
 )
+from frappe.utils.deprecations import deprecated
 from frappe.utils.verified_command import get_signed_params
 
 
@@ -65,7 +65,6 @@ class EmailQueue(Document):
 		unsubscribe_method: DF.Data | None
 		unsubscribe_param: DF.Data | None
 	# end: auto-generated types
-
 	DOCTYPE = "Email Queue"
 
 	def set_recipients(self, recipients):
@@ -153,13 +152,13 @@ class EmailQueue(Document):
 
 		return True
 
-	def send(self, smtp_server_instance: SMTPServer = None, frappe_mail_client: AiBizzAppMail = None):
+	def send(self, smtp_server_instance: SMTPServer = None):
 		"""Send emails to recipients."""
 		if not self.can_send_now():
 			return
 
-		with SendMailContext(self, smtp_server_instance, frappe_mail_client) as ctx:
-			ctx.fetch_outgoing_server()
+		with SendMailContext(self, smtp_server_instance) as ctx:
+			ctx.fetch_smtp_server()
 			message = None
 			for recipient in self.recipients:
 				if recipient.is_mail_sent():
@@ -168,21 +167,8 @@ class EmailQueue(Document):
 				message = ctx.build_message(recipient.recipient)
 				if method := get_hook_method("override_email_send"):
 					method(self, self.sender, recipient.recipient, message)
-				elif not frappe.flags.in_test or frappe.flags.testing_email:
-					if ctx.email_account_doc.service == "AiBizzApp Mail":
-						if self.reference_doctype == "Newsletter":
-							ctx.frappe_mail_client.send_newsletter(
-								sender=self.sender,
-								recipients=recipient.recipient,
-								message=message.decode("utf-8"),
-							)
-						else:
-							ctx.frappe_mail_client.send_raw(
-								sender=self.sender,
-								recipients=recipient.recipient,
-								message=message.decode("utf-8"),
-							)
-					else:
+				else:
+					if not frappe.flags.in_test or frappe.flags.testing_email:
 						ctx.smtp_server.session.sendmail(
 							from_addr=self.sender,
 							to_addrs=recipient.recipient,
@@ -209,7 +195,7 @@ class EmailQueue(Document):
 
 		# Delete queue table
 		(
-			frappe.qb.from_(email_queue).delete().where(email_queue.creation < (Now() - Interval(days=days)))
+			frappe.qb.from_(email_queue).delete().where(email_queue.modified < (Now() - Interval(days=days)))
 		).run()
 
 		# delete child tables, note that this has potential to leave some orphan
@@ -218,13 +204,25 @@ class EmailQueue(Document):
 		(
 			frappe.qb.from_(email_recipient)
 			.delete()
-			.where(email_recipient.creation < (Now() - Interval(days=days)))
+			.where(email_recipient.modified < (Now() - Interval(days=days)))
 		).run()
 
+	@frappe.whitelist()
+	def retry_sending(self):
+		if self.status == "Error":
+			self.status = "Not Sent"
+			self.save(ignore_permissions=True)
 
-from frappe.deprecation_dumpster import send_mail as _send_mail
 
-send_mail = task(queue="short")(_send_mail)
+@task(queue="short")
+@deprecated
+def send_mail(email_queue_name, smtp_server_instance: SMTPServer = None):
+	"""This is equivalent to EmailQueue.send.
+
+	This provides a way to make sending mail as a background job.
+	"""
+	record = EmailQueue.find(email_queue_name)
+	record.send(smtp_server_instance=smtp_server_instance)
 
 
 class SendMailContext:
@@ -232,23 +230,17 @@ class SendMailContext:
 		self,
 		queue_doc: Document,
 		smtp_server_instance: SMTPServer = None,
-		frappe_mail_client: AiBizzAppMail = None,
 	):
 		self.queue_doc: EmailQueue = queue_doc
 		self.smtp_server: SMTPServer = smtp_server_instance
-		self.frappe_mail_client: AiBizzAppMail = frappe_mail_client
 		self.sent_to_atleast_one_recipient = any(
 			rec.recipient for rec in self.queue_doc.recipients if rec.is_mail_sent()
 		)
 		self.email_account_doc = None
 
-	def fetch_outgoing_server(self):
+	def fetch_smtp_server(self):
 		self.email_account_doc = self.queue_doc.get_email_account(raise_error=True)
-
-		if self.email_account_doc.service == "AiBizzApp Mail":
-			if not self.frappe_mail_client:
-				self.frappe_mail_client = self.email_account_doc.get_frappe_mail_client()
-		elif not self.smtp_server:
+		if not self.smtp_server:
 			self.smtp_server = self.email_account_doc.get_smtp_server()
 
 	def __enter__(self):
@@ -427,9 +419,8 @@ class SendMailContext:
 
 
 @frappe.whitelist()
-def retry_sending(queues: str | list[str]):
-	if not frappe.has_permission("Email Queue", throw=True):
-		return
+def bulk_retry(queues):
+	frappe.only_for("System Manager")
 
 	if isinstance(queues, str):
 		queues = json.loads(queues)
@@ -437,8 +428,11 @@ def retry_sending(queues: str | list[str]):
 	if not queues:
 		return
 
-	# NOTE: this will probably work fine with the way current listview works (showing and selecting 20-20 records)
-	# but, ideally this should be enqueued
+	frappe.msgprint(
+		_("Updating Email Queue Statuses. The emails will be picked up in the next scheduled run."),
+		_("Processing..."),
+	)
+
 	email_queue = frappe.qb.DocType("Email Queue")
 	frappe.qb.update(email_queue).set(email_queue.status, "Not Sent").set(email_queue.modified, now()).set(
 		email_queue.modified_by, frappe.session.user
@@ -756,24 +750,18 @@ class QueueBuilder:
 	def send_emails(self, queue_data, final_recipients):
 		# This is used to bulk send emails from same sender to multiple recipients separately
 		# This re-uses smtp server instance to minimize the cost of new session creation
-		frappe_mail_client = None
 		smtp_server_instance = None
 		for r in final_recipients:
 			recipients = list(set([r, *self.final_cc(), *self.bcc]))
 			q = EmailQueue.new({**queue_data, **{"recipients": recipients}}, ignore_permissions=True)
-			if not frappe_mail_client and not smtp_server_instance:
+			if not smtp_server_instance:
 				email_account = q.get_email_account(raise_error=True)
-
-				if email_account.service == "AiBizzApp Mail":
-					frappe_mail_client = email_account.get_frappe_mail_client()
-				else:
-					smtp_server_instance = email_account.get_smtp_server()
+				smtp_server_instance = email_account.get_smtp_server()
 
 			with suppress(Exception):
-				q.send(smtp_server_instance=smtp_server_instance, frappe_mail_client=frappe_mail_client)
+				q.send(smtp_server_instance=smtp_server_instance)
 
-		if smtp_server_instance:
-			smtp_server_instance.quit()
+		smtp_server_instance.quit()
 
 	def as_dict(self, include_recipients=True):
 		email_account = self.get_outgoing_email_account()

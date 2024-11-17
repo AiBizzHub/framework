@@ -7,7 +7,6 @@ import datetime
 import json
 import re
 from collections import Counter
-from collections.abc import Sequence
 
 import frappe
 import frappe.defaults
@@ -101,6 +100,7 @@ class DatabaseQuery:
 		save_user_settings=False,
 		save_user_settings_fields=False,
 		update=None,
+		add_total_row=None,
 		user_settings=None,
 		reference_doctype=None,
 		run=True,
@@ -134,8 +134,6 @@ class DatabaseQuery:
 			limit_page_length = page_length
 		if limit:
 			limit_page_length = limit
-		if as_list and not isinstance(self.fields, (Sequence | str)) and len(self.fields) > 1:
-			frappe.throw(_("Fields must be a list or tuple when as_list is enabled"))
 
 		self.filters = filters or []
 		self.or_filters = or_filters or []
@@ -182,7 +180,7 @@ class DatabaseQuery:
 				"pluck": pluck,
 				"parent_doctype": parent_doctype,
 			} | self.__dict__
-			return frappe.call(controller.get_list, args=kwargs, **kwargs)
+			return controller.get_list(kwargs)
 
 		self.columns = self.get_table_columns()
 
@@ -327,7 +325,7 @@ class DatabaseQuery:
 		return args
 
 	def parse_args(self):
-		"""Convert fields and filters from strings to list, dicts."""
+		"""Convert fields and filters from strings to list, dicts"""
 		if isinstance(self.fields, str):
 			if self.fields == "*":
 				self.fields = ["*"]
@@ -460,7 +458,7 @@ class DatabaseQuery:
 		# add tables from fields
 		if self.fields:
 			for field in self.fields:
-				if "tab" not in field or "." not in field or any(x for x in sql_functions if x in field):
+				if not ("tab" in field and "." in field) or any(x for x in sql_functions if x in field):
 					continue
 
 				table_name = field.split(".", 1)[0]
@@ -619,7 +617,7 @@ class DatabaseQuery:
 		Example:
 		        - User has read permission only on `title` for DocType `Note`
 		        - Query: fields=["*"]
-		        - Result: fields=["title", ...] // will also include AiBizzApp's meta field like `name`, `owner`, etc.
+		        - Result: fields=["title", ...] // will also include Frappe's meta field like `name`, `owner`, etc.
 		"""
 		from frappe.desk.reportview import extract_fieldnames
 
@@ -702,8 +700,7 @@ class DatabaseQuery:
 			j = j + len(permitted_fields) - 1
 
 	def prepare_filter_condition(self, f):
-		"""Return a filter condition in the format:
-
+		"""Returns a filter condition in the format:
 		ifnull(`tabDocType`.`fieldname`, fallback) operator "value"
 		"""
 
@@ -724,16 +721,14 @@ class DatabaseQuery:
 			f.update(get_additional_filter_field(additional_filters_config, f, f.value))
 
 		meta = frappe.get_meta(f.doctype)
-		df = meta.get("fields", {"fieldname": f.fieldname})
-		df = df[0] if df else None
 
 		# primary key is never nullable, modified is usually indexed by default and always present
 		can_be_null = f.fieldname not in ("name", "modified", "creation")
 
-		value = None
-
 		# prepare in condition
 		if f.operator.lower() in NestedSetHierarchy:
+			values = f.value or ""
+
 			# TODO: handle list and tuple
 			# if not isinstance(values, (list, tuple)):
 			# 	values = values.split(",")
@@ -779,33 +774,30 @@ class DatabaseQuery:
 				"not in" if f.operator.lower() in ("not ancestors of", "not descendants of") else "in"
 			)
 
-		if f.operator.lower() in ("in", "not in"):
+		elif f.operator.lower() in ("in", "not in"):
 			# if values contain '' or falsy values then only coalesce column
 			# for `in` query this is only required if values contain '' or values are empty.
 			# for `not in` queries we can't be sure as column values might contain null.
-			can_be_null &= not getattr(df, "not_nullable", False)
 			if f.operator.lower() == "in":
 				can_be_null &= not f.value or any(v is None or v == "" for v in f.value)
 
-			if value is None:
-				values = f.value or ""
-				if isinstance(values, str):
-					values = values.split(",")
+			values = f.value or ""
+			if isinstance(values, str):
+				values = values.split(",")
 
-				fallback = "''"
-				value = [frappe.db.escape((cstr(v) or "").strip(), percent=False) for v in values]
-				if len(value):
-					value = f"({', '.join(value)})"
-				else:
-					value = "('')"
+			fallback = "''"
+			value = [frappe.db.escape((cstr(v) or "").strip(), percent=False) for v in values]
+			if len(value):
+				value = f"({', '.join(value)})"
+			else:
+				value = "('')"
 
 		else:
 			escape = True
+			df = meta.get("fields", {"fieldname": f.fieldname})
+			df = df[0] if df else None
 
-			if df and (
-				df.fieldtype in ("Check", "Float", "Int", "Currency", "Percent")
-				or getattr(df, "not_nullable", False)
-			):
+			if df and df.fieldtype in ("Check", "Float", "Int", "Currency", "Percent"):
 				can_be_null = False
 
 			if f.operator.lower() in ("previous", "next", "timespan"):
@@ -856,7 +848,7 @@ class DatabaseQuery:
 				elif f.value == "not set":
 					f.operator = "="
 					fallback = "''"
-					can_be_null = not getattr(df, "not_nullable", False)
+					can_be_null = True
 
 				value = ""
 
@@ -935,8 +927,7 @@ class DatabaseQuery:
 		role_permissions = frappe.permissions.get_role_permissions(self.doctype_meta, user=self.user)
 		if (
 			not self.doctype_meta.istable
-			and not role_permissions.get("select")
-			and not role_permissions.get("read")
+			and not (role_permissions.get("select") or role_permissions.get("read"))
 			and not self.flags.ignore_permissions
 			and not has_any_user_permission_for_doctype(self.doctype, self.user, self.reference_doctype)
 		):
@@ -995,6 +986,7 @@ class DatabaseQuery:
 		)
 
 	def add_user_permissions(self, user_permissions):
+		doctype_link_fields = []
 		doctype_link_fields = self.doctype_meta.get_link_fields()
 
 		# append current doctype with fieldname as 'name' as first link field
@@ -1092,20 +1084,20 @@ class DatabaseQuery:
 				if self.doctype_meta.sort_field and "," in self.doctype_meta.sort_field:
 					# multiple sort given in doctype definition
 					# Example:
-					# `idx desc, creation desc`
+					# `idx desc, modified desc`
 					# will covert to
-					# `tabItem`.`idx` desc, `tabItem`.`creation` desc
+					# `tabItem`.`idx` desc, `tabItem`.`modified` desc
 					args.order_by = ", ".join(
 						f"`tab{self.doctype}`.`{f_split[0].strip()}` {f_split[1].strip()}"
 						for f in self.doctype_meta.sort_field.split(",")
 						if (f_split := f.split(maxsplit=2))
 					)
 				else:
-					sort_field = self.doctype_meta.sort_field or "creation"
+					sort_field = self.doctype_meta.sort_field or "modified"
 					sort_order = (self.doctype_meta.sort_field and self.doctype_meta.sort_order) or "desc"
 					if self.order_by:
 						args.order_by = (
-							f"`tab{self.doctype}`.`{sort_field or 'creation'}` {sort_order or 'desc'}"
+							f"`tab{self.doctype}`.`{sort_field or 'modified'}` {sort_order or 'desc'}"
 						)
 
 	def validate_order_by_and_group_by(self, parameters: str):
@@ -1222,9 +1214,9 @@ def get_order_by(doctype, meta):
 	if meta.sort_field and "," in meta.sort_field:
 		# multiple sort given in doctype definition
 		# Example:
-		# `idx desc, creation desc`
+		# `idx desc, modified desc`
 		# will covert to
-		# `tabItem`.`idx` desc, `tabItem`.`creation` desc
+		# `tabItem`.`idx` desc, `tabItem`.`modified` desc
 		order_by = ", ".join(
 			f"`tab{doctype}`.`{f_split[0].strip()}` {f_split[1].strip()}"
 			for f in meta.sort_field.split(",")
@@ -1232,9 +1224,13 @@ def get_order_by(doctype, meta):
 		)
 
 	else:
-		sort_field = meta.sort_field or "creation"
+		sort_field = meta.sort_field or "modified"
 		sort_order = (meta.sort_field and meta.sort_order) or "desc"
-		order_by = f"`tab{doctype}`.`{sort_field}` {sort_order}"
+		order_by = f"`tab{doctype}`.`{sort_field or 'modified'}` {sort_order or 'desc'}"
+
+	# draft docs always on top
+	if meta.is_submittable:
+		order_by = f"`tab{doctype}`.docstatus asc, {order_by}"
 
 	return order_by
 
@@ -1336,7 +1332,7 @@ def get_date_range(operator: str, value: str):
 
 
 def requires_owner_constraint(role_permissions):
-	"""Return True if "select" or "read" isn't available without being creator."""
+	"""Returns True if "select" or "read" isn't available without being creator."""
 
 	if not role_permissions.get("has_if_owner_enabled"):
 		return

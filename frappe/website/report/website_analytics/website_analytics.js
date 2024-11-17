@@ -1,4 +1,4 @@
-// Copyright (c) 2016, AiBizzApp Technologies and contributors
+// Copyright (c) 2016, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.query_reports["Website Analytics"] = {
@@ -38,7 +38,6 @@ frappe.query_reports["Website Analytics"] = {
 				{ value: "source", label: __("Source") },
 				{ value: "campaign", label: __("Campaign") },
 				{ value: "medium", label: __("Medium") },
-				{ value: "content", label: __("Content") },
 			],
 			default: "path",
 		},

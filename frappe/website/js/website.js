@@ -86,8 +86,8 @@ $.extend(frappe, {
 			data: opts.args,
 			dataType: "json",
 			headers: {
-				"X-AiBizzApp-CSRF-Token": frappe.csrf_token,
-				"X-AiBizzApp-CMD": (opts.args && opts.args.cmd) || "" || "",
+				"X-Frappe-CSRF-Token": frappe.csrf_token,
+				"X-Frappe-CMD": (opts.args && opts.args.cmd) || "" || "",
 			},
 			statusCode: opts.statusCode || {
 				404: function () {
@@ -425,9 +425,7 @@ frappe.setup_search = function (target, search_scope) {
 	}
 
 	let $search_input = $(`<div class="dropdown" id="dropdownMenuSearch">
-			<input type="search" class="form-control" placeholder="${__(
-				"Search the docs (Press / to focus)"
-			)}" />
+			<input type="search" class="form-control" placeholder="Search the docs (Press / to focus)" />
 			<div class="overflow-hidden shadow dropdown-menu w-100" aria-labelledby="dropdownMenuSearch">
 			</div>
 			<div class="search-icon">

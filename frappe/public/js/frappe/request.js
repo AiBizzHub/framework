@@ -10,12 +10,11 @@ frappe.request.ajax_count = 0;
 frappe.request.waiting_for_ajax = [];
 frappe.request.logs = {};
 
-frappe.xcall = function (method, params, type) {
+frappe.xcall = function (method, params) {
 	return new Promise((resolve, reject) => {
 		frappe.call({
 			method: method,
 			args: params,
-			type: type || "POST",
 			callback: (r) => {
 				resolve(r.message);
 			},
@@ -262,17 +261,17 @@ frappe.request.call = function (opts) {
 		async: opts.async,
 		headers: Object.assign(
 			{
-				"X-AiBizzApp-CSRF-Token": frappe.csrf_token,
+				"X-Frappe-CSRF-Token": frappe.csrf_token,
 				Accept: "application/json",
-				"X-AiBizzApp-CMD": (opts.args && opts.args.cmd) || "" || "",
+				"X-Frappe-CMD": (opts.args && opts.args.cmd) || "" || "",
 			},
 			opts.headers
 		),
-		cache: window.dev_server ? false : true,
+		cache: false,
 	};
 
 	if (opts.args && opts.args.doctype) {
-		ajax_args.headers["X-AiBizzApp-Doctype"] = encodeURIComponent(opts.args.doctype);
+		ajax_args.headers["X-Frappe-Doctype"] = encodeURIComponent(opts.args.doctype);
 	}
 
 	frappe.last_request = ajax_args.data;
@@ -543,7 +542,7 @@ frappe.request.report_error = function (xhr, request_opts) {
 		const code_block = (snippet) => "```\n" + snippet + "\n```";
 
 		let request_data = Object.assign({}, request_opts);
-		request_data.request_id = xhr.getResponseHeader("X-AiBizzApp-Request-Id");
+		request_data.request_id = xhr.getResponseHeader("X-Frappe-Request-Id");
 		const traceback_info = [
 			"### App Versions",
 			code_block(JSON.stringify(frappe.boot.versions, null, "\t")),

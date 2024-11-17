@@ -23,7 +23,5 @@ class WorkflowTransition(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		state: DF.Link
-		workflow_builder_id: DF.Data | None
 	# end: auto-generated types
-
 	pass

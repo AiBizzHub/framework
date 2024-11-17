@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -39,8 +39,8 @@ class FormTour(Document):
 		ui_tour: DF.Check
 		view_name: DF.Literal["Workspaces", "List", "Form", "Tree", "Page"]
 		workspace_name: DF.Link | None
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def before_save(self):
 		if self.is_standard and not self.module:
 			if self.workspace_name:

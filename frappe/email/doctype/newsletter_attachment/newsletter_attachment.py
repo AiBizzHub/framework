@@ -1,4 +1,4 @@
-# Copyright (c) 2021, AiBizzApp Technologies and contributors
+# Copyright (c) 2021, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 # import frappe
@@ -19,5 +19,4 @@ class NewsletterAttachment(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 	# end: auto-generated types
-
 	pass

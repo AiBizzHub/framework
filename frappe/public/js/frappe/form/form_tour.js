@@ -11,10 +11,8 @@ frappe.ui.form.FormTour = class FormTour {
 			padding: 10,
 			overlayClickNext: true,
 			keyboardControl: true,
-			nextBtnText: __("Next"),
-			prevBtnText: __("Previous"),
-			doneBtnText: __("Done"),
-			closeBtnText: __("Close"),
+			nextBtnText: "Next",
+			prevBtnText: "Previous",
 			opacity: 0.25,
 			onHighlighted: (step) => {
 				// if last step is to save, then attach a listener to save button
@@ -137,11 +135,7 @@ frappe.ui.form.FormTour = class FormTour {
 		return {
 			element,
 			name,
-			popover: {
-				title: __(title),
-				description: __(description),
-				position: frappe.router.slug(position || "Bottom"),
-			},
+			popover: { title, description, position: frappe.router.slug(position || "Bottom") },
 			onNext: on_next,
 			onPrevious: on_prev,
 		};

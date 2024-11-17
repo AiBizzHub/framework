@@ -12,7 +12,7 @@ from frappe.utils import update_progress_bar
 
 
 class FullTextSearch:
-	"""AiBizzApp Wrapper for Whoosh"""
+	"""Frappe Wrapper for Whoosh"""
 
 	def __init__(self, index_name):
 		self.index_name = index_name
@@ -107,13 +107,16 @@ class FullTextSearch:
 
 		writer.commit(optimize=True)
 
-	def search(self, text: str, scope: str | None = None, limit: int = 20) -> list[frappe._dict]:
-		"""Search from the current index.
+	def search(self, text, scope=None, limit=20):
+		"""Search from the current index
 
 		Args:
-		        text: String to search for
-		        scope: Scope to limit the search. Defaults to None.
-		        limit: Limit number of search results. Defaults to 20.
+		        text (str): String to search for
+		        scope (str, optional): Scope to limit the search. Defaults to None.
+		        limit (int, optional): Limit number of search results. Defaults to 20.
+
+		Returns:
+		        [List(_dict)]: Search results
 		"""
 		ix = self.get_index()
 

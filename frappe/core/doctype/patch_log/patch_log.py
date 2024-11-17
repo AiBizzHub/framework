@@ -20,7 +20,6 @@ class PatchLog(Document):
 		skipped: DF.Check
 		traceback: DF.Code | None
 	# end: auto-generated types
-
 	pass
 
 

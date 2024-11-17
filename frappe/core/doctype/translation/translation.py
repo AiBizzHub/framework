@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import json
@@ -25,8 +25,8 @@ class Translation(Document):
 		language: DF.Link
 		source_text: DF.Code
 		translated_text: DF.Code
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		if is_html(self.source_text):
 			self.remove_html_from_source()

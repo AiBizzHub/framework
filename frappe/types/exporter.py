@@ -17,7 +17,6 @@ from keyword import iskeyword
 from pathlib import Path
 
 import frappe
-from frappe import scrub
 from frappe.types import DF
 
 field_template = "{field}: {type}"
@@ -60,12 +59,7 @@ class TypeExporter:
 
 		self.imports = {"from frappe.types import DF"}
 		self.indent = "\t"
-		self.controller_path = (
-			Path(frappe.get_module_path(doc.module))
-			/ "doctype"
-			/ scrub(self.doctype)
-			/ f"{scrub(self.doctype)}.py"
-		)
+		self.controller_path = Path(inspect.getfile(get_controller(self.doctype)))
 
 	def export_types(self):
 		self._guess_indentation()
@@ -83,14 +77,12 @@ class TypeExporter:
 			existing_block_start = code.find(first_line)
 			existing_block_end = code.find(last_line) + len(last_line)
 
-			code = code[:existing_block_start] + new_code + "\n\n" + code[existing_block_end:].lstrip("\n")
+			code = code[:existing_block_start] + new_code + code[existing_block_end:]
 		elif class_definition in code:  # Add just after class definition
 			# Regex by default will only match till line ends, span end is when we need to stop
 			if class_def := re.search(rf"class {despaced_name}\(.*", code):  # )
 				class_definition_end = class_def.span()[1] + 1
-				code = (
-					code[:class_definition_end] + new_code + "\n\n" + code[class_definition_end:].lstrip("\n")
-				)
+				code = code[:class_definition_end] + new_code + "\n" + code[class_definition_end:]
 
 		if self._validate_code(code):
 			self.controller_path.write_text(code)
@@ -170,9 +162,6 @@ class TypeExporter:
 		if field.fieldtype in non_nullable_types:
 			return False
 
-		if field.not_nullable:
-			return False
-
 		return not bool(field.reqd)
 
 	def _generic_parameters(self, field) -> str | None:
@@ -195,7 +184,7 @@ class TypeExporter:
 
 	@staticmethod
 	def _validate_code(code) -> bool:
-		"""Make sure whatever code AiBizzApp adds dynamically is valid python."""
+		"""Make sure whatever code Frappe adds dynamically is valid python."""
 		try:
 			ast.parse(code)
 			return True

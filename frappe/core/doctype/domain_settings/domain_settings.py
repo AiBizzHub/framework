@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and contributors
+# Copyright (c) 2017, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -16,8 +16,8 @@ class DomainSettings(Document):
 		from frappe.types import DF
 
 		active_domains: DF.Table[HasDomain]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def set_active_domains(self, domains):
 		active_domains = [d.domain for d in self.active_domains]
 		added = False
@@ -52,7 +52,7 @@ class DomainSettings(Document):
 		for domain in all_domains:
 			data = frappe.get_domain_data(domain)
 			if not frappe.db.get_value("Domain", domain):
-				frappe.get_doc(doctype="Domain", domain=domain).insert()
+				frappe.get_doc(dict(doctype="Domain", domain=domain)).insert()
 			if "modules" in data:
 				for module in data.get("modules"):
 					frappe.db.set_value("Module Def", module, "restrict_to_domain", domain)
@@ -60,7 +60,7 @@ class DomainSettings(Document):
 			if "restricted_roles" in data:
 				for role in data["restricted_roles"]:
 					if not frappe.db.get_value("Role", role):
-						frappe.get_doc(doctype="Role", role_name=role).insert()
+						frappe.get_doc(dict(doctype="Role", role_name=role)).insert()
 					frappe.db.set_value("Role", role, "restrict_to_domain", domain)
 
 					if domain not in active_domains:

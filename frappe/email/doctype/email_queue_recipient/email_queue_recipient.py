@@ -1,4 +1,4 @@
-# Copyright (c) 2015, AiBizzApp Technologies and contributors
+# Copyright (c) 2015, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -21,7 +21,6 @@ class EmailQueueRecipient(Document):
 		recipient: DF.Data | None
 		status: DF.Literal["", "Not Sent", "Sent"]
 	# end: auto-generated types
-
 	DOCTYPE = "Email Queue Recipient"
 
 	def is_mail_to_be_sent(self):

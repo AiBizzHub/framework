@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import os
@@ -40,8 +40,8 @@ class GoogleDrive(Document):
 		last_backup_on: DF.Datetime | None
 		refresh_token: DF.Data | None
 		send_email_for_successful_backup: DF.Check
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def validate(self):
 		doc_before_save = self.get_doc_before_save()
 		if doc_before_save and doc_before_save.backup_folder_name != self.backup_folder_name:
@@ -87,7 +87,9 @@ def authorize_access(reauthorize=False, code=None):
 
 
 def get_google_drive_object():
-	"""Return an object of Google Drive."""
+	"""
+	Returns an object of Google Drive.
+	"""
 	account = frappe.get_doc("Google Drive")
 	oauth_obj = GoogleOAuth("drive")
 

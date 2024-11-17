@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and contributors
+# Copyright (c) 2018, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 import gzip
 import json
@@ -38,8 +38,8 @@ class PreparedReport(Document):
 		report_end_time: DF.Datetime | None
 		report_name: DF.Data
 		status: DF.Literal["Error", "Queued", "Completed", "Started"]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	@property
 	def queued_by(self):
 		return self.owner
@@ -52,7 +52,7 @@ class PreparedReport(Document):
 	def clear_old_logs(days=30):
 		prepared_reports_to_delete = frappe.get_all(
 			"Prepared Report",
-			filters={"creation": ["<", frappe.utils.add_days(frappe.utils.now(), -days)]},
+			filters={"modified": ["<", frappe.utils.add_days(frappe.utils.now(), -days)]},
 		)
 
 		for batch in frappe.utils.create_batch(prepared_reports_to_delete, 100):
@@ -206,7 +206,7 @@ def expire_stalled_report():
 		"Prepared Report",
 		{
 			"status": "Started",
-			"creation": ("<", add_to_date(now(), seconds=-FAILURE_THRESHOLD, as_datetime=True)),
+			"modified": ("<", add_to_date(now(), seconds=-FAILURE_THRESHOLD, as_datetime=True)),
 		},
 		{
 			"status": "Failed",

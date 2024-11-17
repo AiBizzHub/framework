@@ -8,7 +8,7 @@ from frappe.core.doctype.doctype.test_doctype import new_doctype
 from frappe.desk.form.save import savedocs
 from frappe.model.document import Document
 from frappe.model.virtual_doctype import validate_controller
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 TEST_DOCTYPE_NAME = "VirtualDoctypeTest"
 TEST_CHILD_DOCTYPE_NAME = "VirtualDoctypeTestChild"
@@ -68,21 +68,21 @@ class VirtualDoctypeTest(Document):
 		self.update_data(data)
 
 	@staticmethod
-	def get_list():
+	def get_list(args):
 		data = VirtualDoctypeTest.get_current_data()
 		return [frappe._dict(doc) for name, doc in data.items()]
 
 	@staticmethod
-	def get_count():
+	def get_count(args):
 		data = VirtualDoctypeTest.get_current_data()
 		return len(data)
 
 	@staticmethod
-	def get_stats():
+	def get_stats(args):
 		return {}
 
 
-class TestVirtualDoctypes(IntegrationTestCase):
+class TestVirtualDoctypes(FrappeTestCase):
 	@classmethod
 	def setUpClass(cls):
 		frappe.flags.allow_doctype_export = True
@@ -157,18 +157,19 @@ class TestVirtualDoctypes(IntegrationTestCase):
 		updated_docs = {doc1.name, doc2.name}
 		self.assertEqual(docs, updated_docs)
 
-		listed_docs = {d.name for d in VirtualDoctypeTest.get_list()}
+		listed_docs = {d.name for d in VirtualDoctypeTest.get_list({})}
 		self.assertEqual(docs, listed_docs)
 
 	def test_get_count(self):
-		self.assertIsInstance(VirtualDoctypeTest.get_count(), int)
+		args = {"doctype": TEST_DOCTYPE_NAME, "filters": [], "fields": []}
+		self.assertIsInstance(VirtualDoctypeTest.get_count(args), int)
 
 	def test_delete_doc(self):
 		doc = frappe.get_doc(doctype=TEST_DOCTYPE_NAME).insert()
 
 		frappe.delete_doc(doc.doctype, doc.name)
 
-		listed_docs = {d.name for d in VirtualDoctypeTest.get_list()}
+		listed_docs = {d.name for d in VirtualDoctypeTest.get_list({})}
 		self.assertNotIn(doc.name, listed_docs)
 
 	def test_controller_validity(self):

@@ -114,9 +114,21 @@ def emit_via_redis(event, message, room):
 
 
 @frappe.whitelist(allow_guest=True)
-def has_permission(doctype: str, name: str) -> bool:
-	if not frappe.has_permission(doctype=doctype, doc=name, ptype="read"):
-		raise frappe.PermissionError
+def can_subscribe_doc(doctype: str, docname: str) -> bool:
+	from frappe.exceptions import PermissionError
+
+	if not frappe.has_permission(doctype=doctype, doc=docname, ptype="read"):
+		raise PermissionError()
+
+	return True
+
+
+@frappe.whitelist(allow_guest=True)
+def can_subscribe_doctype(doctype: str) -> bool:
+	from frappe.exceptions import PermissionError
+
+	if not frappe.has_permission(doctype=doctype, ptype="read"):
+		raise PermissionError()
 
 	return True
 
@@ -126,7 +138,6 @@ def get_user_info():
 	return {
 		"user": frappe.session.user,
 		"user_type": frappe.session.data.user_type,
-		"installed_apps": frappe.get_installed_apps(),
 	}
 
 

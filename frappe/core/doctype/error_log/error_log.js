@@ -1,4 +1,4 @@
-// Copyright (c) 2022, AiBizzApp Technologies and contributors
+// Copyright (c) 2022, AiBizzHub, LLC and contributors
 // For license information, please see license.txt
 
 frappe.ui.form.on("Error Log", {
@@ -11,9 +11,6 @@ frappe.ui.form.on("Error Log", {
 					reference_doctype: frm.doc.reference_doctype,
 					reference_name: frm.doc.reference_name,
 				});
-			});
-			frm.add_custom_button(__("Open reference document"), function () {
-				frappe.set_route("Form", frm.doc.reference_doctype, frm.doc.reference_name);
 			});
 		}
 	},

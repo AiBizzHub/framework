@@ -110,7 +110,7 @@ def rate_limit(
 	:param ip_based: flag to allow ip based rate-limiting
 	:type ip_based: Boolean
 
-	Return: a decorator function that limit the number of requests per endpoint
+	:returns: a decorator function that limit the number of requests per endpoint
 	"""
 
 	def ratelimit_decorator(fn):
@@ -140,7 +140,7 @@ def rate_limit(
 
 			cache_key = frappe.cache.make_key(f"rl:{frappe.form_dict.cmd}:{identity}")
 
-			value = frappe.cache.get(cache_key)
+			value = frappe.cache.get(cache_key) or 0
 			if not value:
 				frappe.cache.setex(cache_key, seconds, 0)
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2022, AiBizzApp Technologies and contributors
+# Copyright (c) 2022, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 # import frappe
@@ -22,5 +22,4 @@ class WebFormListColumn(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 	# end: auto-generated types
-
 	pass

@@ -1,4 +1,4 @@
-# Copyright (c) 2018, AiBizzApp Technologies and Contributors
+# Copyright (c) 2018, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import json
 import time
@@ -7,20 +7,11 @@ from contextlib import contextmanager
 import frappe
 from frappe.desk.query_report import generate_report_result, get_report_doc
 from frappe.query_builder.utils import db_type_is
-from frappe.tests import IntegrationTestCase, UnitTestCase, timeout
 from frappe.tests.test_query_builder import run_only_if
+from frappe.tests.utils import FrappeTestCase, timeout
 
 
-class UnitTestPreparedReport(UnitTestCase):
-	"""
-	Unit tests for PreparedReport.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestPreparedReport(IntegrationTestCase):
+class TestPreparedReport(FrappeTestCase):
 	@classmethod
 	def tearDownClass(cls):
 		for r in frappe.get_all("Prepared Report", pluck="name"):

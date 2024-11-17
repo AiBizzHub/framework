@@ -1,22 +1,13 @@
-# Copyright (c) 2017, AiBizzApp Technologies and Contributors
+# Copyright (c) 2017, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestLetterHead(UnitTestCase):
-	"""
-	Unit tests for LetterHead.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestLetterHead(IntegrationTestCase):
+class TestLetterHead(FrappeTestCase):
 	def test_auto_image(self):
 		letter_head = frappe.get_doc(
-			doctype="Letter Head", letter_head_name="Test", source="Image", image="/public/test.png"
+			dict(doctype="Letter Head", letter_head_name="Test", source="Image", image="/public/test.png")
 		).insert()
 
 		# test if image is automatically set

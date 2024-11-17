@@ -1,4 +1,4 @@
-# Copyright (c) 2017, AiBizzApp Technologies and Contributors
+# Copyright (c) 2017, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 from unittest.mock import MagicMock, patch
 
@@ -7,23 +7,14 @@ from rauth import OAuth2Service
 import frappe
 from frappe.auth import CookieManager, LoginManager
 from frappe.integrations.doctype.social_login_key.social_login_key import BaseUrlNotSetError
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase, change_settings
 from frappe.utils import set_request
 from frappe.utils.oauth import login_via_oauth2
 
 TEST_GITHUB_USER = "githublogin@example.com"
 
 
-class UnitTestSocialLoginKey(UnitTestCase):
-	"""
-	Unit tests for SocialLoginKey.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestSocialLoginKey(IntegrationTestCase):
+class TestSocialLoginKey(FrappeTestCase):
 	def setUp(self) -> None:
 		frappe.set_user("Administrator")
 		frappe.delete_doc("User", TEST_GITHUB_USER, force=True)
@@ -32,7 +23,7 @@ class TestSocialLoginKey(IntegrationTestCase):
 
 	def test_adding_frappe_social_login_provider(self):
 		frappe.set_user("Administrator")
-		provider_name = "AiBizzApp"
+		provider_name = "Frappe"
 		social_login_key = make_social_login_key(social_login_provider=provider_name)
 		social_login_key.get_social_login_provider(provider_name, initialize=True)
 		self.assertRaises(BaseUrlNotSetError, social_login_key.insert)
@@ -81,7 +72,7 @@ class TestSocialLoginKey(IntegrationTestCase):
 			login_via_oauth2("github", "iwriu", {"token": "ewrwerwer"})
 		self.assertEqual(frappe.session.user, "Guest")
 
-	@IntegrationTestCase.change_settings("Website Settings", disable_signup=1)
+	@change_settings("Website Settings", disable_signup=1)
 	def test_force_enabled_signups(self):
 		"""Social login key can override website settings for disabled signups."""
 		key = github_social_login_setup()
@@ -110,7 +101,7 @@ def create_or_update_social_login_key():
 		social_login_key = frappe.get_doc("Social Login Key", "frappe")
 	except frappe.DoesNotExistError:
 		social_login_key = frappe.new_doc("Social Login Key")
-	social_login_key.get_social_login_provider("AiBizzApp", initialize=True)
+	social_login_key.get_social_login_provider("Frappe", initialize=True)
 	social_login_key.base_url = frappe.utils.get_url()
 	social_login_key.enable_social_login = 0
 	social_login_key.save()

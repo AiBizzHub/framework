@@ -1,17 +1,8 @@
-# Copyright (c) 2020, AiBizzApp Technologies and Contributors
+# Copyright (c) 2020, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
 # import frappe
-from frappe.tests import IntegrationTestCase, UnitTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class UnitTestWebPageView(UnitTestCase):
-	"""
-	Unit tests for WebPageView.
-	Use this class for testing individual functions and methods.
-	"""
-
-	pass
-
-
-class TestWebPageView(IntegrationTestCase):
+class TestWebPageView(FrappeTestCase):
 	pass

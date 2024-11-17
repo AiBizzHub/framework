@@ -10,10 +10,10 @@ from frappe.gettext.translate import (
 	write_binary,
 	write_catalog,
 )
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestTranslate(IntegrationTestCase):
+class TestTranslate(FrappeTestCase):
 	def setUp(self):
 		pass
 

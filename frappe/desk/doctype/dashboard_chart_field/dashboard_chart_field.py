@@ -1,4 +1,4 @@
-# Copyright (c) 2020, AiBizzApp Technologies and contributors
+# Copyright (c) 2020, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 # import frappe
@@ -20,5 +20,4 @@ class DashboardChartField(Document):
 		parenttype: DF.Data
 		y_field: DF.Literal[None]
 	# end: auto-generated types
-
 	pass

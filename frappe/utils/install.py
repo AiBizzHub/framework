@@ -4,7 +4,6 @@ import getpass
 
 import frappe
 from frappe.geo.doctype.country.country import import_country_and_currency
-from frappe.utils import cint
 from frappe.utils.password import update_password
 
 
@@ -48,9 +47,8 @@ def after_install():
 			frappe.db.set_single_value("System Settings", "setup_complete", 0)
 
 	# clear test log
-	from frappe.tests.utils.generators import _after_install_clear_test_log
-
-	_after_install_clear_test_log()
+	with open(frappe.get_site_path(".test_log"), "w") as f:
+		f.write("")
 
 	add_standard_navbar_items()
 
@@ -144,7 +142,18 @@ def install_basic_docs():
 
 
 def get_admin_password():
-	return frappe.conf.get("admin_password") or getpass.getpass("Set Administrator password: ")
+	def ask_admin_password():
+		admin_password = getpass.getpass("Set Administrator password: ")
+		admin_password2 = getpass.getpass("Re-enter Administrator password: ")
+		if not admin_password == admin_password2:
+			print("\nPasswords do not match")
+			return ask_admin_password()
+		return admin_password
+
+	admin_password = frappe.conf.get("admin_password")
+	if not admin_password:
+		return ask_admin_password()
+	return admin_password
 
 
 def before_tests():
@@ -158,7 +167,7 @@ def before_tests():
 	frappe.clear_cache()
 
 	# complete setup if missing
-	if not cint(frappe.db.get_single_value("System Settings", "setup_complete")):
+	if not int(frappe.db.get_single_value("System Settings", "setup_complete") or 0):
 		complete_setup_wizard()
 
 	frappe.db.set_single_value("Website Settings", "disable_signup", 0)
@@ -178,7 +187,6 @@ def complete_setup_wizard():
 			"country": "United States",
 			"timezone": "America/New_York",
 			"currency": "USD",
-			"enable_telemtry": 1,
 		}
 	)
 

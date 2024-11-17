@@ -1,4 +1,4 @@
-# Copyright (c) 2023, AiBizzApp Technologies and contributors
+# Copyright (c) 2023, AiBizzHub, LLC and contributors
 # For license information, please see license.txt
 
 # import frappe
@@ -23,10 +23,9 @@ class RecorderQuery(Document):
 		parent: DF.Data
 		parentfield: DF.Data
 		parenttype: DF.Data
-		query: DF.Data | None
+		query: DF.Data
 		stack: DF.Text | None
 	# end: auto-generated types
-
 	pass
 
 	def db_insert(self, *args, **kwargs):
@@ -39,15 +38,15 @@ class RecorderQuery(Document):
 		pass
 
 	@staticmethod
-	def get_list():
+	def get_list(args):
 		pass
 
 	@staticmethod
-	def get_count():
+	def get_count(args):
 		pass
 
 	@staticmethod
-	def get_stats():
+	def get_stats(args):
 		pass
 
 	def delete(self):

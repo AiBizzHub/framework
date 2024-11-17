@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -19,8 +19,8 @@ class WebsiteMetaTag(Document):
 		parentfield: DF.Data
 		parenttype: DF.Data
 		value: DF.Text
-	# end: auto-generated types
 
+	# end: auto-generated types
 	def get_content(self):
 		# can't have new lines in meta content
 		return (self.value or "").replace("\n", " ")

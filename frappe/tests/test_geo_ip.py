@@ -1,9 +1,9 @@
 # Copyright (c) 2015, AiBizzHub, LLC and Contributors
 # License: MIT. See LICENSE
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase
 
 
-class TestGeoIP(IntegrationTestCase):
+class TestGeoIP(FrappeTestCase):
 	def test_geo_ip(self):
 		return
 		from frappe.sessions import get_geo_ip_country

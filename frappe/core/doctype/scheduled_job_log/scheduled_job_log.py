@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -20,9 +20,9 @@ class ScheduledJobLog(Document):
 		details: DF.Code | None
 		scheduled_job_type: DF.Link
 		status: DF.Literal["Scheduled", "Complete", "Failed"]
-	# end: auto-generated types
 
+	# end: auto-generated types
 	@staticmethod
 	def clear_old_logs(days=90):
 		table = frappe.qb.DocType("Scheduled Job Log")
-		frappe.db.delete(table, filters=(table.creation < (Now() - Interval(days=days))))
+		frappe.db.delete(table, filters=(table.modified < (Now() - Interval(days=days))))

@@ -1,4 +1,4 @@
-# Copyright (c) 2019, AiBizzApp Technologies and contributors
+# Copyright (c) 2019, AiBizzHub, LLC and contributors
 # License: MIT. See LICENSE
 
 import frappe
@@ -32,13 +32,15 @@ class MilestoneTracker(Document):
 		from_value = before_save and before_save.get(self.track_field) or None
 		if from_value != doc.get(self.track_field):
 			frappe.get_doc(
-				doctype="Milestone",
-				reference_type=doc.doctype,
-				reference_name=doc.name,
-				track_field=self.track_field,
-				from_value=from_value,
-				value=doc.get(self.track_field),
-				milestone_tracker=self.name,
+				dict(
+					doctype="Milestone",
+					reference_type=doc.doctype,
+					reference_name=doc.name,
+					track_field=self.track_field,
+					from_value=from_value,
+					value=doc.get(self.track_field),
+					milestone_tracker=self.name,
+				)
 			).insert(ignore_permissions=True)
 
 

@@ -9,9 +9,11 @@ from frappe.app import make_form_dict
 from frappe.core.doctype.doctype.test_doctype import new_doctype
 from frappe.desk.doctype.note.note import Note
 from frappe.model.naming import make_autoname, parse_naming_series, revert_series_if_last
-from frappe.tests import IntegrationTestCase
+from frappe.tests.utils import FrappeTestCase, timeout
 from frappe.utils import cint, now_datetime, set_request
 from frappe.website.serve import get_response
+
+from . import update_system_settings
 
 
 class CustomTestNote(Note):
@@ -25,7 +27,7 @@ class CustomNoteWithoutProperty(Note):
 		return now_datetime() - self.creation
 
 
-class TestDocument(IntegrationTestCase):
+class TestDocument(FrappeTestCase):
 	def test_get_return_empty_list_for_table_field_if_none(self):
 		d = frappe.get_doc({"doctype": "User"})
 		self.assertEqual(d.get("roles"), [])
@@ -95,37 +97,6 @@ class TestDocument(IntegrationTestCase):
 		d.save()
 
 		self.assertEqual(frappe.db.get_value(d.doctype, d.name, "subject"), "subject changed")
-
-	def test_discard_transitions(self):
-		d = self.test_insert()
-		self.assertEqual(d.docstatus, 0)
-
-		# invalid: Submit > Discard, Cancel > Discard
-		d.submit()
-		self.assertRaises(frappe.ValidationError, d.discard)
-		d.reload()
-
-		d.cancel()
-		self.assertRaises(frappe.ValidationError, d.discard)
-
-		# valid: Draft > Discard
-		d2 = self.test_insert()
-		d2.discard()
-		self.assertEqual(d2.docstatus, 2)
-
-	def test_save_on_discard_throws(self):
-		from frappe.desk.doctype.event.event import Event
-
-		d3 = self.test_insert()
-
-		def test_on_discard(d3):
-			d3.subject = d3.subject + "update"
-			d3.save()
-
-		d3.on_discard = (test_on_discard)(d3)
-		d3.on_discard = test_on_discard.__get__(d3, Event)
-
-		self.assertRaises(frappe.ValidationError, d3.discard)
 
 	def test_value_changed(self):
 		d = self.test_insert()
@@ -295,10 +266,10 @@ class TestDocument(IntegrationTestCase):
 			self.assertEqual(cint(old_current) - 1, new_current)
 
 	def test_non_negative_check(self):
-		frappe.delete_doc_if_exists("Currency", "AiBizzApp Coin", 1)
+		frappe.delete_doc_if_exists("Currency", "Frappe Coin", 1)
 
 		d = frappe.get_doc(
-			{"doctype": "Currency", "currency_name": "AiBizzApp Coin", "smallest_currency_fraction_value": -1}
+			{"doctype": "Currency", "currency_name": "Frappe Coin", "smallest_currency_fraction_value": -1}
 		)
 
 		self.assertRaises(frappe.NonNegativeError, d.insert)
@@ -307,7 +278,7 @@ class TestDocument(IntegrationTestCase):
 		d.insert()
 		self.assertEqual(frappe.db.get_value("Currency", d.name), d.name)
 
-		frappe.delete_doc_if_exists("Currency", "AiBizzApp Coin", 1)
+		frappe.delete_doc_if_exists("Currency", "Frappe Coin", 1)
 
 	def test_get_formatted(self):
 		frappe.get_doc(
@@ -522,7 +493,7 @@ class TestDocument(IntegrationTestCase):
 		self.assertEqual(val, changed_val)
 
 
-class TestDocumentWebView(IntegrationTestCase):
+class TestDocumentWebView(FrappeTestCase):
 	def get(self, path, user="Guest"):
 		frappe.set_user(user)
 		set_request(method="GET", path=path)
@@ -536,13 +507,13 @@ class TestDocumentWebView(IntegrationTestCase):
 		document_key = todo.get_document_share_key()
 
 		# with old-style signature key
-		with self.change_settings("System Settings", {"allow_older_web_view_links": True}):
-			old_document_key = todo.get_signature()
-			url = f"/ToDo/{todo.name}?key={old_document_key}"
-			self.assertEqual(self.get(url).status, "200 OK")
+		update_system_settings({"allow_older_web_view_links": True}, True)
+		old_document_key = todo.get_signature()
+		url = f"/ToDo/{todo.name}?key={old_document_key}"
+		self.assertEqual(self.get(url).status, "200 OK")
 
-		with self.change_settings("System Settings", {"allow_older_web_view_links": False}):
-			self.assertEqual(self.get(url).status, "401 UNAUTHORIZED")
+		update_system_settings({"allow_older_web_view_links": False}, True)
+		self.assertEqual(self.get(url).status, "401 UNAUTHORIZED")
 
 		# with valid key
 		url = f"/ToDo/{todo.name}?key={document_key}"
@@ -566,63 +537,6 @@ class TestDocumentWebView(IntegrationTestCase):
 
 		# Logged-in user can access the page without key
 		self.assertEqual(self.get(url_without_key, "Administrator").status, "200 OK")
-
-	def test_base_class_set_correctly_on_has_web_view_change(self):
-		from pathlib import Path
-
-		from frappe.modules.utils import get_doc_path, scrub
-
-		frappe.flags.allow_doctype_export = True
-
-		frappe.delete_doc_if_exists("DocType", "Test WebViewDocType", force=1)
-		test_doctype = new_doctype(
-			"Test WebViewDocType",
-			custom=0,
-			fields=[
-				{"fieldname": "test_field", "fieldtype": "Data"},
-				{"fieldname": "route", "fieldtype": "Data"},
-				{"fieldname": "is_published", "fieldtype": "Check"},
-			],
-		)
-		test_doctype.insert()
-
-		doc_path = Path(get_doc_path(test_doctype.module, test_doctype.doctype, test_doctype.name))
-		controller_file_path = doc_path / f"{scrub(test_doctype.name)}.py"
-
-		# enable web view
-		test_doctype.has_web_view = 1
-		test_doctype.is_published_field = "is_published"
-		test_doctype.save()
-
-		# check if base class was updated to "WebsiteGenerator"
-		with open(controller_file_path) as f:
-			file_content = f.read()
-			self.assertIn(
-				"import WebsiteGenerator",
-				file_content,
-				"`WebsiteGenerator` not imported when web view is enabled!",
-			)
-			self.assertIn(
-				"(WebsiteGenerator)",
-				file_content,
-				"`Document` class not replaced with `WebsiteGenerator` when web view is enabled!",
-			)
-
-		# disable web view
-		test_doctype.has_web_view = 0
-		test_doctype.save()
-
-		# check if base class was updated to "Document" again
-		with open(controller_file_path) as f:
-			file_content = f.read()
-			self.assertIn(
-				"import Document", file_content, "`Document` not imported when web view is disabled!"
-			)
-			self.assertIn(
-				"(Document)",
-				file_content,
-				"`WebsiteGenerator` class not replaced with `Document` when web view is disabled!",
-			)
 
 	def test_bulk_inserts(self):
 		from frappe.model.document import bulk_insert

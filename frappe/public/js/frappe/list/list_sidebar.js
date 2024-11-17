@@ -23,7 +23,6 @@ frappe.views.ListSidebar = class ListSidebar {
 
 		this.setup_list_filter();
 		this.setup_list_group_by();
-		this.setup_collapsible();
 
 		// do not remove
 		// used to trigger custom scripts
@@ -165,29 +164,7 @@ frappe.views.ListSidebar = class ListSidebar {
 			wrapper: this.page.sidebar.find(".list-filters"),
 			doctype: this.doctype,
 			list_view: this.list_view,
-			section_title: this.page.sidebar.find(".save-filter-section .sidebar-label"),
 		});
-	}
-
-	setup_collapsible() {
-		// tags and save filter sections should be collapsible
-		let sections = [
-			["tags-section", "list-tags"],
-			["save-filter-section", "list-filters"],
-			["filter-section", "list-group-by"],
-		];
-
-		for (let s of sections) {
-			this.page.sidebar.find(`.${s[0]} .sidebar-label`).on("click", () => {
-				let list_tags = this.page.sidebar.find("." + s[1]);
-				let icon = "#es-line-down";
-				list_tags.toggleClass("hide");
-				if (list_tags.hasClass("hide")) {
-					icon = "#es-line-right-chevron";
-				}
-				this.page.sidebar.find(`.${s[0]} .es-line use`).attr("href", icon);
-			});
-		}
 	}
 
 	setup_kanban_boards() {
@@ -238,11 +215,11 @@ frappe.views.ListSidebar = class ListSidebar {
 	}
 
 	set_loading_state(dropdown) {
-		dropdown.html(`<div>
+		dropdown.html(`<li>
 			<div class="empty-state">
 				${__("Loading...")}
 			</div>
-		</div>`);
+		</li>`);
 	}
 
 	render_stat(stats) {
@@ -294,12 +271,20 @@ frappe.views.ListSidebar = class ListSidebar {
 			}
 
 			const message = __("Get more insights with");
-			const link = "https://frappe.io/s/insights";
-			const cta = "AiBizzApp Insights";
+			const link = "https://aibizzapp.com";
+			const cta = __("AiBizzApp Insights");
 
 			this.insights_banner = $(`
-				<div class="sidebar-section">
-					${message} <a href="${link}" target="_blank" style="color: var(--text-color)">${cta} &rarr; </a>
+				<div style="position: relative;">
+					<div class="pr-3">
+						${message} <a href="${link}" target="_blank" style="color: var(--text-color)">${cta} &rarr; </a>
+					</div>
+					<div style="position: absolute; top: -1px; right: -4px; cursor: pointer;" title="Dismiss"
+						onclick="localStorage.setItem('show_insights_banner', 'false') || this.parentElement.remove()">
+						<svg class="icon  icon-sm" style="">
+							<use class="" href="#icon-close"></use>
+						</svg>
+					</div>
 				</div>
 			`).appendTo(this.sidebar);
 		} catch (error) {

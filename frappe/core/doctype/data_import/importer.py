@@ -179,7 +179,7 @@ class Importer:
 
 					log_index += 1
 
-					if self.data_import.status != "Partial Success":
+					if not self.data_import.status == "Partial Success":
 						self.data_import.db_set("status", "Partial Success")
 
 					# commit after every successful import
@@ -522,8 +522,8 @@ class ImportFile:
 
 	def parse_next_row_for_import(self, data):
 		"""
-		Parse rows that make up a doc. A doc maybe built from a single row or multiple rows.
-		Return the doc, rows, and data without the rows.
+		Parses rows that make up a doc. A doc maybe built from a single row or multiple rows.
+		Returns the doc, rows, and data without the rows.
 		"""
 		doctypes = self.header.doctypes
 
@@ -1012,13 +1012,7 @@ class Column:
 				)
 		elif self.df.fieldtype in ("Date", "Time", "Datetime"):
 			# guess date/time format
-			# TODO: add possibility for user, to define the date format explicitly in the Data Import UI
-			# for example, if date column in file is in  %d-%m-%y  format -> 23-04-24.
-			# The date guesser might fail, as, this can be also parsed as %y-%m-%d, as both 23 and 24 are valid for year & for day
-			# This is an issue that cannot be handled automatically, no matter how we try, as it completely depends on the user's input.
-			# Defining an explicit value which surely recognizes
 			self.date_format = self.guess_date_format_for_column()
-
 			if not self.date_format:
 				if self.df.fieldtype == "Time":
 					self.date_format = "%H:%M:%S"
