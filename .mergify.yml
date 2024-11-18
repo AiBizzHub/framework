@@ -3,9 +3,9 @@ pull_request_rules:
     conditions:
       - and:
         - and:
-          - author!=surajshetty3416
-          - author!=deepeshgarg007
-          - author!=ankush
+          - author!=aibizzapp
+          - author!=shoaib-jamal
+          - author!=aibizzhub
           - author!=frappe-pr-bot
           - author!=mergify[bot]
         - or:
@@ -15,7 +15,6 @@ pull_request_rules:
       comment:
           message: |
             @{{author}}, thanks for the contribution, but we do not accept pull requests on a stable branch. Please raise PR on an appropriate hotfix branch.
-            https://github.com/frappe/erpnext/wiki/Pull-Request-Checklist#which-branch
 
   - name: Automatic merge on CI success and review
     conditions:
@@ -47,24 +46,3 @@ pull_request_rules:
           - develop
         assignees:
           - "{{ author }}"
-
-  - name: backport to version-13-hotfix
-    conditions:
-      - label="backport version-13-hotfix"
-    actions:
-      backport:
-        branches:
-          - version-13-hotfix
-        assignees:
-          - "{{ author }}"
-
-  - name: backport to version-14-hotfix
-    conditions:
-      - label="backport version-14-hotfix"
-    actions:
-      backport:
-        branches:
-          - version-14-hotfix
-        assignees:
-          - "{{ author }}"
-

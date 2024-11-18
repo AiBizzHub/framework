@@ -9,7 +9,7 @@ frappe.ui.misc.about = function () {
 					<p>${__("Streamline Your Business With AiBizzHub")}</p>
 					<p><i class='fa fa-globe fa-fw'></i>
 						${__("Website")}:
-						<a href='https://frappeframework.com' target='_blank'>https://frappeframework.com</a></p>
+						<a href='https://aibizzapp.com' target='_blank'>https://aibizzapp.com</a></p>
 					
 					<p><i class='fa fa-graduation-cap fa-fw'></i>
 						AiBizzHub School: <a href='https://aibizzhub.school' target='_blank'>https://aibizzhub.school</a></p>
